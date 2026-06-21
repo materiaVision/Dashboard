@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
 body{
 margin:0;
@@ -15,7 +13,7 @@ font-family:Segoe UI;
 color:#fff;
 display:grid;
 grid-template-columns:260px 1fr 320px;
-grid-template-rows:50px 1fr 200px;
+grid-template-rows:50px 1fr 300px;
 gap:6px;
 height:100vh;
 padding:6px;
@@ -40,7 +38,12 @@ overflow:hidden;
 
 #left{display:flex;flex-direction:column;gap:6px;}
 #right{display:flex;flex-direction:column;gap:6px;}
-#bottom{grid-column:1/4;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+
+/* TRAFFIC FULL WIDTH */
+#traffic{
+grid-column:1/4;
+position:relative;
+}
 
 iframe{
 width:100%;
@@ -48,7 +51,18 @@ height:100%;
 border:none;
 }
 
-/* fallback */
+/* overlay (żeby wyglądało jak terminal) */
+#traffic::after{
+content:"";
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4));
+pointer-events:none;
+}
+
 .centerMsg{
 display:flex;
 justify-content:center;
@@ -69,10 +83,8 @@ text-align:center;
 </div>
 
 <div id="left">
-
 <div class="panel">CRYPTO</div>
 <div class="panel">INDICES</div>
-
 </div>
 
 <div class="panel">
@@ -80,29 +92,15 @@ text-align:center;
 </div>
 
 <div id="right">
-
 <div class="panel">NEWS</div>
 <div class="panel">AIR</div>
-
 </div>
 
-<div id="bottom">
-
-<!-- TRAFFIC -->
-<div class="panel">
+<!-- 🔥 DUŻY TRAFFIC -->
+<div id="traffic" class="panel">
 
 <div id="itsBox" class="centerMsg">
 Ładowanie ITS...
-</div>
-
-</div>
-
-<div class="panel">
-<iframe src="https://globe.adsbexchange.com/"></iframe>
-</div>
-
-<div class="panel">
-SUN
 </div>
 
 </div>
@@ -116,19 +114,32 @@ clock.innerText=d.toLocaleTimeString();
 date.innerText=d.toLocaleDateString();
 },1000);
 
-// SAFE ITS LOAD
-const its = document.createElement("iframe");
-its.src = "https://www.its.bydgoszcz.pl/";
+// ITS LOAD (stabilny)
+function loadITS(){
+const box = document.getElementById("itsBox");
+box.innerHTML = "";
 
-its.onload = () => {
-document.getElementById("itsBox").innerHTML="";
-document.getElementById("itsBox").appendChild(its);
+const iframe = document.createElement("iframe");
+
+// próbujemy konkretny widok mapy
+iframe.src = "https://www.its.bydgoszcz.pl/";
+
+iframe.onload = () => {
+console.log("ITS loaded");
 };
 
-its.onerror = () => {
-document.getElementById("itsBox").innerHTML =
-"ITS blokuje osadzanie 🚫<br>Wejdź ręcznie: its.bydgoszcz.pl";
+iframe.onerror = () => {
+box.innerHTML = "ITS blokuje mapę 🚫<br>Otwórz ręcznie: its.bydgoszcz.pl";
 };
+
+box.appendChild(iframe);
+}
+
+// start
+loadITS();
+
+// odświeżanie co 60s (bo ITS często się “zawiesza”)
+setInterval(loadITS, 60000);
 
 </script>
 
