@@ -3,178 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Terminal Dashboard</title>
+<title>Terminal Clone</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-
 body{
 margin:0;
-font-family: "Segoe UI", Arial;
 background:#0b0f14;
-color:#e0e0e0;
+color:#cfd8dc;
+font-family:Segoe UI;
 display:grid;
-grid-template-columns:320px 1fr 320px;
-grid-template-rows:1fr 320px;
-gap:10px;
+grid-template-columns:280px 1fr 320px;
+grid-template-rows:60px 1fr 220px;
+gap:8px;
 height:100vh;
-padding:10px;
+padding:8px;
 }
 
-/* KAFEL */
-.card{
+/* TOP BAR */
+#topbar{
+grid-column:1/4;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:0 10px;
 background:#0f1620;
-border:1px solid rgba(255,255,255,0.05);
-border-radius:10px;
-padding:12px;
-box-shadow:0 0 10px rgba(0,0,0,0.7);
+border:1px solid rgba(255,255,255,.05);
+border-radius:8px;
 }
 
-/* HEADER */
-h3{
-margin:0 0 8px 0;
-font-size:14px;
-color:#8fa3b0;
-letter-spacing:1px;
+/* PANELS */
+.panel{
+background:#0f1620;
+border:1px solid rgba(255,255,255,.05);
+border-radius:8px;
+padding:8px;
+display:flex;
+flex-direction:column;
 }
 
-/* CLOCK */
-#clock{
-font-size:42px;
-font-weight:300;
+/* LEFT */
+#left{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:8px;}
+/* CENTER */
+#center{grid-column:2;grid-row:2;}
+/* RIGHT */
+#right{grid-column:3;grid-row:2;display:flex;flex-direction:column;gap:8px;}
+/* BOTTOM */
+#bottom{grid-column:1/4;grid-row:3;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+
+h4{
+margin:0 0 6px 0;
+font-size:12px;
+color:#7f8c8d;
 }
 
-/* ASSETS */
 .asset{
 display:flex;
 justify-content:space-between;
-font-size:14px;
-margin-bottom:6px;
+font-size:13px;
 }
 
 .green{color:#00ff88;}
 .red{color:#ff3b3b;}
 
-/* WYKRES */
-canvas{
-height:40px!important;
-}
+canvas{height:40px!important;}
 
-/* GLOW */
-.card:hover{
-box-shadow:0 0 15px rgba(0,255,150,0.2);
-}
-
-/* GRID */
-#centerBottom{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:10px;
-}
-
-/* IFRAME */
 iframe{
 width:100%;
 height:100%;
 border:none;
-border-radius:8px;
+border-radius:6px;
 }
-
-/* RESPONSIVE */
-@media(max-width:1000px){
-body{
-grid-template-columns:1fr;
-height:auto;
-}
-}
-
 </style>
 </head>
 
 <body>
 
-<!-- LEFT -->
-<div style="display:flex;flex-direction:column;gap:10px;">
-
-<div class="card">
+<!-- TOP -->
+<div id="topbar">
 <div id="clock"></div>
-<div id="date" style="opacity:.6;"></div>
+<div>DASHBOARD TERMINAL</div>
+<div id="date"></div>
 </div>
 
-<div class="card">
-<h3>CRYPTO</h3>
+<!-- LEFT -->
+<div id="left">
 
-<div class="asset">
-<span id="btcPrice"></span>
-<span id="btcChange"></span>
-</div>
+<div class="panel">
+<h4>CRYPTO</h4>
+<div class="asset"><span id="btcPrice"></span><span id="btcChange"></span></div>
 <canvas id="btcChart"></canvas>
-
-<div class="asset">
-<span id="ethPrice"></span>
-<span id="ethChange"></span>
-</div>
+<div class="asset"><span id="ethPrice"></span><span id="ethChange"></span></div>
 <canvas id="ethChart"></canvas>
-
 </div>
 
-<div class="card">
-<h3>INDICES</h3>
-<div class="asset"><span>SP500</span><span class="green">+0.48%</span></div>
-<div class="asset"><span>NASDAQ</span><span class="green">+0.72%</span></div>
-<div class="asset"><span>WIG20</span><span class="green">+0.62%</span></div>
+<div class="panel">
+<h4>INDICES</h4>
+<div class="asset">SP500 <span class="green">+0.48%</span></div>
+<div class="asset">NASDAQ <span class="green">+0.72%</span></div>
+<div class="asset">WIG20 <span class="green">+0.62%</span></div>
 </div>
 
+<div class="panel">
+<h4>FOREX</h4>
+<div class="asset">EUR/PLN <span>4.29</span></div>
+<div class="asset">USD/PLN <span>3.96</span></div>
 </div>
 
-<div class="card">
-<iframe src="https://www.google.com/maps?q=Bydgoszcz&output=embed"></iframe>
 </div>
 
 <!-- CENTER -->
-<div class="card">
-<iframe src="https://embed.windy.com/embed2.html?lat=53.1&lon=18.0&zoom=6&overlay=radar"></iframe>
+<div id="center" class="panel">
+<iframe src="https://embed.windy.com/embed2.html?lat=53.1&lon=18&zoom=6&overlay=radar"></iframe>
 </div>
 
-<div id="centerBottom">
+<!-- RIGHT -->
+<div id="right">
 
-<div class="card">
-<h3>TRAFFIC</h3>
-<iframe src="https://www.google.com/maps?q=traffic%20Bydgoszcz&output=embed"></iframe>
+<div class="panel">
+<h4>NEWS</h4>
+<ul id="news"></ul>
 </div>
 
-<div class="card">
-<h3>FLIGHTS</h3>
-<iframe src="https://globe.adsbexchange.com/"></iframe>
-</div>
-
-<div class="card">
-<h3>AIR</h3>
+<div class="panel">
+<h4>AIR</h4>
 <div id="air"></div>
 </div>
 
 </div>
 
-<!-- RIGHT -->
-<div style="display:flex;flex-direction:column;gap:10px;">
+<!-- BOTTOM -->
+<div id="bottom">
 
-<div class="card">
-<h3>FOREX</h3>
-<div class="asset">EUR/PLN <span>4.29</span></div>
-<div class="asset">USD/PLN <span>3.96</span></div>
+<div class="panel">
+<h4>TRAFFIC</h4>
+<iframe src="https://www.google.com/maps?q=traffic%20Bydgoszcz&output=embed"></iframe>
 </div>
 
-<div class="card">
-<h3>NEWS</h3>
-<ul id="news"></ul>
+<div class="panel">
+<h4>FLIGHTS</h4>
+<iframe src="https://globe.adsbexchange.com/"></iframe>
 </div>
 
-</div>
-
-<div class="card">
-<h3>SUN</h3>
+<div class="panel">
+<h4>SUN</h4>
 <div id="sun"></div>
+</div>
+
 </div>
 
 <script>
@@ -189,15 +165,15 @@ date.innerText=d.toLocaleDateString();
 // CHART
 let btcData=[], ethData=[];
 
-let btcChart=new Chart(btcChartEl=document.getElementById("btcChart"),{
+let btcChart=new Chart(btcChart,{
 type:"line",
-data:{labels:[],datasets:[{data:btcData,borderColor:"#00ff88",borderWidth:2}]},
+data:{labels:[],datasets:[{data:btcData,borderColor:"#00ff88"}]},
 options:{plugins:{legend:false},scales:{x:{display:false},y:{display:false}}}
 });
 
-let ethChart=new Chart(document.getElementById("ethChart"),{
+let ethChart=new Chart(ethChart,{
 type:"line",
-data:{labels:[],datasets:[{data:ethData,borderColor:"#00aaff",borderWidth:2}]},
+data:{labels:[],datasets:[{data:ethData,borderColor:"#00aaff"}]},
 options:{plugins:{legend:false},scales:{x:{display:false},y:{display:false}}}
 });
 
@@ -229,20 +205,12 @@ ethChart.update();
 loadCrypto();
 setInterval(loadCrypto,4000);
 
-// AIR
-fetch("https://api.openaq.org/v2/latest?coordinates=53.12,18.00")
-.then(r=>r.json())
-.then(d=>{
-air.innerText="PM2.5: "+(d.results[0]?.measurements[0]?.value || "brak");
-});
-
 // NEWS
 fetch("https://api.allorigins.win/get?url="+encodeURIComponent("https://www.bankier.pl/rss/wiadomosci.xml"))
 .then(r=>r.json())
 .then(d=>{
 let xml=new DOMParser().parseFromString(d.contents,"text/xml");
-let items=xml.querySelectorAll("item");
-items.forEach((i,x)=>{
+xml.querySelectorAll("item").forEach((i,x)=>{
 if(x<5){
 let li=document.createElement("li");
 li.innerText=i.querySelector("title").textContent;
@@ -251,13 +219,18 @@ news.appendChild(li);
 });
 });
 
+// AIR
+fetch("https://api.openaq.org/v2/latest?coordinates=53.12,18.00")
+.then(r=>r.json())
+.then(d=>{
+air.innerText="PM2.5: "+(d.results[0]?.measurements[0]?.value || "brak");
+});
+
 // SUN
 fetch("https://api.sunrise-sunset.org/json?lat=53.12&lng=18.00&formatted=0")
 .then(r=>r.json())
 .then(d=>{
-let sr=new Date(d.results.sunrise).toLocaleTimeString();
-let ss=new Date(d.results.sunset).toLocaleTimeString();
-sun.innerText="↑ "+sr+" ↓ "+ss;
+sun.innerText="↑ "+new Date(d.results.sunrise).toLocaleTimeString()+" ↓ "+new Date(d.results.sunset).toLocaleTimeString();
 });
 
 </script>
