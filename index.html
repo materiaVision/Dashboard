@@ -2,8 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard</title>
+<title>Dashboard PRO</title>
 
 <style>
 body{
@@ -12,55 +11,95 @@ background:#0b0f14;
 font-family:Segoe UI;
 color:#fff;
 display:grid;
-grid-template-columns:260px 1fr 320px;
-grid-template-rows:50px 1fr 260px;
-gap:6px;
+grid-template-rows:140px 1fr 120px;
+gap:8px;
 height:100vh;
-padding:6px;
+padding:8px;
 }
 
+/* TOP WIDGETY */
 #top{
-grid-column:1/4;
+display:grid;
+grid-template-columns:2fr 1fr 1fr 1fr;
+gap:8px;
+}
+
+.widget{
+background:#111826;
+border-radius:14px;
+padding:12px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+}
+
+/* pogoda */
+.weatherMain{
+display:flex;
+align-items:center;
+gap:15px;
+font-size:18px;
+}
+
+.weatherMain img{
+width:60px;
+}
+
+/* FORECAST */
+.forecast{
 display:flex;
 justify-content:space-between;
-align-items:center;
-padding:0 12px;
-background:#0f1620;
-border:1px solid rgba(255,255,255,.05);
+font-size:13px;
 }
 
-.panel{
-background:#0f1620;
-border:1px solid rgba(255,255,255,.05);
-padding:6px;
+.forecast div{
+text-align:center;
+}
+
+/* SYSTEM VIEW */
+#viewer{
+position:relative;
+background:#000;
+border-radius:14px;
 overflow:hidden;
 }
 
-#left{display:flex;flex-direction:column;gap:6px;}
-#right{display:flex;flex-direction:column;gap:6px;}
-
-iframe{
+.system{
+position:absolute;
 width:100%;
 height:100%;
 border:none;
+opacity:0;
+transition:opacity 0.4s;
 }
 
-/* TRAFFIC FULL WIDTH */
-#traffic{
-grid-column:1/4;
-position:relative;
+.system.active{
+opacity:1;
 }
 
-/* lekki overlay żeby pasowało do stylu */
-#traffic::after{
-content:"";
-position:absolute;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4));
-pointer-events:none;
+/* BOTTOM MENU */
+#bottom{
+display:flex;
+gap:10px;
+}
+
+.tile{
+flex:1;
+background:#111826;
+border-radius:12px;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+transition:0.2s;
+}
+
+.tile:hover{
+background:#1a2333;
+}
+
+.tile.active{
+border:2px solid #00ff88;
 }
 
 </style>
@@ -68,40 +107,82 @@ pointer-events:none;
 
 <body>
 
+<!-- 🔥 TOP -->
 <div id="top">
-<div id="clock"></div>
-<div>GLOBAL TERMINAL</div>
-<div id="date"></div>
+
+<!-- pogoda -->
+<div class="widget">
+<div class="weatherMain">
+<img src="https://cdn-icons-png.flaticon.com/512/869/869869.png">
+<div>
+<div style="font-size:28px;">22°C</div>
+<div>Bydgoszcz</div>
+</div>
+</div>
 </div>
 
-<div id="left">
-<div class="panel">CRYPTO</div>
-<div class="panel">INDICES</div>
+<!-- forecast -->
+<div class="widget forecast">
+<div>🌤<br>23°</div>
+<div>🌧<br>19°</div>
+<div>☀️<br>25°</div>
 </div>
 
-<!-- 🔥 DUŻY RADAR -->
-<div class="panel">
-<iframe src="https://embed.windy.com/embed2.html?lat=53.12&lon=18.00&zoom=6&overlay=radar"></iframe>
+<!-- air -->
+<div class="widget">
+<div style="font-size:14px;">Jakość powietrza</div>
+<div style="font-size:26px;color:#00ff88;">GOOD</div>
 </div>
 
-<div id="right">
-<div class="panel">NEWS</div>
-<div class="panel">AIR</div>
+<!-- sun -->
+<div class="widget">
+<div>🌅 04:45</div>
+<div>🌇 21:05</div>
 </div>
 
-<!-- 🔥 DUŻY TRAFFIC -->
-<div id="traffic" class="panel">
-<iframe src="https://www.its.bydgoszcz.pl/mapa"></iframe>
+</div>
+
+<!-- 🔥 SYSTEM VIEW -->
+<div id="viewer">
+
+<iframe id="radar" class="system active"
+src="https://embed.windy.com/embed2.html?lat=53.12&lon=18.00&zoom=6&overlay=radar"></iframe>
+
+<iframe id="its" class="system"
+src="https://www.its.bydgoszcz.pl/mapa"></iframe>
+
+</div>
+
+<!-- 🔥 BOTTOM -->
+<div id="bottom">
+
+<div class="tile active" onclick="show('radar', this)">
+RADAR
+</div>
+
+<div class="tile" onclick="show('its', this)">
+ITS
+</div>
+
 </div>
 
 <script>
 
-// CLOCK
-setInterval(()=>{
-let d=new Date();
-clock.innerText=d.toLocaleTimeString();
-date.innerText=d.toLocaleDateString();
-},1000);
+function show(id, el){
+
+// zmiana systemu
+document.querySelectorAll(".system").forEach(s=>{
+s.classList.remove("active");
+});
+document.getElementById(id).classList.add("active");
+
+// zmiana tile
+document.querySelectorAll(".tile").forEach(t=>{
+t.classList.remove("active");
+});
+el.classList.add("active");
+
+}
 
 </script>
 
