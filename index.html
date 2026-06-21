@@ -3,50 +3,92 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard PRO</title>
+<title>Terminal Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {
+
+body{
 margin:0;
-font-family: Arial;
+font-family: "Segoe UI", Arial;
 background:#0b0f14;
-color:#fff;
+color:#e0e0e0;
 display:grid;
 grid-template-columns:320px 1fr 320px;
-grid-template-rows:1fr 300px;
-gap:12px;
+grid-template-rows:1fr 320px;
+gap:10px;
 height:100vh;
+padding:10px;
+}
+
+/* KAFEL */
+.card{
+background:#0f1620;
+border:1px solid rgba(255,255,255,0.05);
+border-radius:10px;
 padding:12px;
+box-shadow:0 0 10px rgba(0,0,0,0.7);
 }
 
-.card {
-background:#111821;
-border-radius:12px;
-padding:12px;
-box-shadow:0 0 15px rgba(0,0,0,0.6);
-overflow:hidden;
+/* HEADER */
+h3{
+margin:0 0 8px 0;
+font-size:14px;
+color:#8fa3b0;
+letter-spacing:1px;
 }
 
-iframe{width:100%;height:100%;border:none;border-radius:8px;}
-
-#centerBottom{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:12px;
+/* CLOCK */
+#clock{
+font-size:42px;
+font-weight:300;
 }
 
-#clock{font-size:38px;font-weight:bold;}
-.small{opacity:0.7;font-size:13px;}
-
+/* ASSETS */
 .asset{
 display:flex;
 justify-content:space-between;
-margin-bottom:6px;
 font-size:14px;
+margin-bottom:6px;
 }
 
-.green{color:#4caf50;}
-.red{color:#f44336;}
+.green{color:#00ff88;}
+.red{color:#ff3b3b;}
+
+/* WYKRES */
+canvas{
+height:40px!important;
+}
+
+/* GLOW */
+.card:hover{
+box-shadow:0 0 15px rgba(0,255,150,0.2);
+}
+
+/* GRID */
+#centerBottom{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+}
+
+/* IFRAME */
+iframe{
+width:100%;
+height:100%;
+border:none;
+border-radius:8px;
+}
+
+/* RESPONSIVE */
+@media(max-width:1000px){
+body{
+grid-template-columns:1fr;
+height:auto;
+}
+}
+
 </style>
 </head>
 
@@ -57,17 +99,31 @@ font-size:14px;
 
 <div class="card">
 <div id="clock"></div>
-<div class="small" id="date"></div>
+<div id="date" style="opacity:.6;"></div>
 </div>
 
 <div class="card">
-<h3>Krypto</h3>
-<div id="crypto"></div>
+<h3>CRYPTO</h3>
+
+<div class="asset">
+<span id="btcPrice"></span>
+<span id="btcChange"></span>
+</div>
+<canvas id="btcChart"></canvas>
+
+<div class="asset">
+<span id="ethPrice"></span>
+<span id="ethChange"></span>
+</div>
+<canvas id="ethChart"></canvas>
+
 </div>
 
 <div class="card">
-<h3>Indeksy</h3>
-<iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview&symbol=SPX&interval=D&theme=dark"></iframe>
+<h3>INDICES</h3>
+<div class="asset"><span>SP500</span><span class="green">+0.48%</span></div>
+<div class="asset"><span>NASDAQ</span><span class="green">+0.72%</span></div>
+<div class="asset"><span>WIG20</span><span class="green">+0.62%</span></div>
 </div>
 
 </div>
@@ -84,17 +140,17 @@ font-size:14px;
 <div id="centerBottom">
 
 <div class="card">
-<h3>Ruch</h3>
+<h3>TRAFFIC</h3>
 <iframe src="https://www.google.com/maps?q=traffic%20Bydgoszcz&output=embed"></iframe>
 </div>
 
 <div class="card">
-<h3>Samoloty</h3>
+<h3>FLIGHTS</h3>
 <iframe src="https://globe.adsbexchange.com/"></iframe>
 </div>
 
 <div class="card">
-<h3>Powietrze</h3>
+<h3>AIR</h3>
 <div id="air"></div>
 </div>
 
@@ -104,23 +160,25 @@ font-size:14px;
 <div style="display:flex;flex-direction:column;gap:10px;">
 
 <div class="card">
-<h3>Waluty</h3>
-<iframe src="https://s.tradingview.com/widgetembed/?symbol=FX:EURPLN&interval=D&theme=dark"></iframe>
+<h3>FOREX</h3>
+<div class="asset">EUR/PLN <span>4.29</span></div>
+<div class="asset">USD/PLN <span>3.96</span></div>
 </div>
 
 <div class="card">
-<h3>Wiadomości</h3>
+<h3>NEWS</h3>
 <ul id="news"></ul>
 </div>
 
 </div>
 
 <div class="card">
-<h3>Słońce</h3>
+<h3>SUN</h3>
 <div id="sun"></div>
 </div>
 
 <script>
+
 // CLOCK
 setInterval(()=>{
 let d=new Date();
@@ -128,22 +186,48 @@ clock.innerText=d.toLocaleTimeString();
 date.innerText=d.toLocaleDateString();
 },1000);
 
-// CRYPTO (BINANCE)
+// CHART
+let btcData=[], ethData=[];
+
+let btcChart=new Chart(btcChartEl=document.getElementById("btcChart"),{
+type:"line",
+data:{labels:[],datasets:[{data:btcData,borderColor:"#00ff88",borderWidth:2}]},
+options:{plugins:{legend:false},scales:{x:{display:false},y:{display:false}}}
+});
+
+let ethChart=new Chart(document.getElementById("ethChart"),{
+type:"line",
+data:{labels:[],datasets:[{data:ethData,borderColor:"#00aaff",borderWidth:2}]},
+options:{plugins:{legend:false},scales:{x:{display:false},y:{display:false}}}
+});
+
+// CRYPTO
 async function loadCrypto(){
-try{
 let btc=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT").then(r=>r.json());
 let eth=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT").then(r=>r.json());
 
-crypto.innerHTML=`
-<div class="asset">BTC ${parseFloat(btc.lastPrice).toFixed(0)} <span class="${btc.priceChangePercent>0?'green':'red'}">${parseFloat(btc.priceChangePercent).toFixed(2)}%</span></div>
-<div class="asset">ETH ${parseFloat(eth.lastPrice).toFixed(0)} <span class="${eth.priceChangePercent>0?'green':'red'}">${parseFloat(eth.priceChangePercent).toFixed(2)}%</span></div>
-`;
-}catch{
-crypto.innerText="Błąd danych";
-}
+let btcP=parseFloat(btc.lastPrice);
+let ethP=parseFloat(eth.lastPrice);
+
+btcPrice.innerText="BTC "+btcP.toFixed(0);
+btcChange.innerText=btc.priceChangePercent+"%";
+btcChange.className=btc.priceChangePercent>0?"green":"red";
+
+ethPrice.innerText="ETH "+ethP.toFixed(0);
+ethChange.innerText=eth.priceChangePercent+"%";
+ethChange.className=eth.priceChangePercent>0?"green":"red";
+
+btcData.push(btcP);
+ethData.push(ethP);
+
+if(btcData.length>30) btcData.shift();
+if(ethData.length>30) ethData.shift();
+
+btcChart.update();
+ethChart.update();
 }
 loadCrypto();
-setInterval(loadCrypto,10000);
+setInterval(loadCrypto,4000);
 
 // AIR
 fetch("https://api.openaq.org/v2/latest?coordinates=53.12,18.00")
@@ -158,7 +242,6 @@ fetch("https://api.allorigins.win/get?url="+encodeURIComponent("https://www.bank
 .then(d=>{
 let xml=new DOMParser().parseFromString(d.contents,"text/xml");
 let items=xml.querySelectorAll("item");
-news.innerHTML="";
 items.forEach((i,x)=>{
 if(x<5){
 let li=document.createElement("li");
@@ -174,8 +257,9 @@ fetch("https://api.sunrise-sunset.org/json?lat=53.12&lng=18.00&formatted=0")
 .then(d=>{
 let sr=new Date(d.results.sunrise).toLocaleTimeString();
 let ss=new Date(d.results.sunset).toLocaleTimeString();
-sun.innerText="Wschód: "+sr+" | Zachód: "+ss;
+sun.innerText="↑ "+sr+" ↓ "+ss;
 });
+
 </script>
 
 </body>
