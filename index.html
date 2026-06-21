@@ -1,3 +1,209 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard ULTRA</title>
+
+<style>
+body{
+margin:0;
+font-family:Segoe UI;
+color:#fff;
+height:100vh;
+display:grid;
+grid-template-rows:150px 1fr 120px;
+gap:12px;
+padding:12px;
+background:#0b0f14;
+}
+
+/* GLASS */
+.glass{
+background:linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02));
+backdrop-filter:blur(25px);
+border:1px solid rgba(255,255,255,0.12);
+border-radius:18px;
+box-shadow:0 10px 40px rgba(0,0,0,.5);
+}
+
+/* TOP */
+#top{
+display:grid;
+grid-template-columns:2fr 2fr 1fr 1fr;
+gap:12px;
+}
+
+.widget{
+padding:14px;
+}
+
+/* WEATHER */
+.weather{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.weather img{
+width:60px;
+}
+
+/* 🔥 FORECAST PRO */
+.forecast{
+display:flex;
+gap:10px;
+margin-top:10px;
+}
+
+.day{
+flex:1;
+padding:10px;
+border-radius:12px;
+text-align:center;
+background:rgba(255,255,255,0.06);
+backdrop-filter:blur(10px);
+transition:0.3s;
+}
+
+.day:hover{
+transform:translateY(-5px);
+background:rgba(255,255,255,0.12);
+}
+
+.day img{
+width:32px;
+margin:5px 0;
+}
+
+.dayName{
+font-size:12px;
+opacity:.7;
+}
+
+/* VIEWER */
+#viewer{
+position:relative;
+overflow:hidden;
+}
+
+.system{
+position:absolute;
+width:100%;
+height:100%;
+border:none;
+opacity:0;
+transition:0.4s;
+}
+
+.system.active{
+opacity:1;
+}
+
+/* BOTTOM */
+#bottom{
+display:flex;
+gap:12px;
+}
+
+.tile{
+flex:1;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+transition:0.3s;
+gap:6px;
+}
+
+.tile:hover{
+transform:translateY(-5px);
+}
+
+.tile.active{
+border:2px solid #00ff88;
+box-shadow:0 0 20px rgba(0,255,136,0.6);
+}
+
+.icon{
+font-size:22px;
+}
+
+iframe{
+width:100%;
+height:100%;
+border:none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- TOP -->
+<div id="top">
+
+<!-- 🌤 POGODA -->
+<div class="widget glass">
+<div id="weatherBox">Ładowanie pogody...</div>
+</div>
+
+<!-- 🔥 FORECAST -->
+<div class="widget glass">
+<div>Prognoza</div>
+<div class="forecast" id="forecast"></div>
+</div>
+
+<!-- AQI -->
+<div class="widget glass">
+<div>Powietrze</div>
+<div id="aqiValue">--</div>
+</div>
+
+<!-- SUN -->
+<div class="widget glass">
+<div id="sunrise">--</div>
+<div id="sunset">--</div>
+</div>
+
+</div>
+
+<!-- VIEWER -->
+<div id="viewer" class="glass">
+
+<iframe id="radar" class="system active"
+src="https://embed.windy.com/embed2.html?lat=53.12&lon=18.00&zoom=6&overlay=radar"></iframe>
+
+<iframe id="its" class="system"
+src="https://www.its.bydgoszcz.pl/mapa"></iframe>
+
+</div>
+
+<!-- BOTTOM -->
+<div id="bottom">
+
+<div class="tile glass active" onclick="show('radar', this)">
+<div class="icon">🌧</div>RADAR</div>
+
+<div class="tile glass" onclick="show('its', this)">
+<div class="icon">🚦</div>ITS</div>
+
+</div>
+
+<script>
+
+// SWITCH
+function show(id, el){
+document.querySelectorAll(".system").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+
+document.querySelectorAll(".tile").forEach(t=>t.classList.remove("active"));
+el.classList.add("active");
+}
+
+// DNI TYGODNIA
+const daysPL = ["Nd","Pon","Wt","Śr","Czw","Pt","Sob"];
+
+// 🌤 WEATHER
 async function loadWeather(){
 try{
 const res = await fetch("https://wttr.in/Bydgoszcz?format=j1");
@@ -5,21 +211,21 @@ const data = await res.json();
 
 const current = data.current_condition[0];
 
-// MAIN WEATHER
+const temp = current.temp_C;
+const desc = current.weatherDesc[0].value;
+const icon = current.weatherIconUrl[0].value;
+
 document.getElementById("weatherBox").innerHTML = `
 <div class="weather">
-<img src="${current.weatherIconUrl[0].value}">
+<img src="${icon}">
 <div>
-<div style="font-size:28px">${current.temp_C}°C</div>
-<div style="opacity:.7">${current.weatherDesc[0].value}</div>
+<div style="font-size:28px">${temp}°C</div>
+<div style="opacity:.7">${desc}</div>
 </div>
 </div>
 `;
 
-// DNI
-const daysPL = ["Nd","Pon","Wt","Śr","Czw","Pt","Sob"];
-
-// FORECAST (NAPRAWIONY)
+// 🔥 FORECAST PRO
 let html = "";
 
 for(let i=0;i<5;i++){
@@ -28,10 +234,7 @@ const day = data.weather[i];
 const date = new Date(day.date);
 const dayName = daysPL[date.getDay()];
 
-// BEZPIECZNA IKONA
-let icon = day.hourly && day.hourly[0]
-? day.hourly[0].weatherIconUrl[0].value
-: current.weatherIconUrl[0].value;
+const icon = day.hourly[4].weatherIconUrl[0].value;
 
 html += `
 <div class="day">
@@ -45,7 +248,43 @@ html += `
 document.getElementById("forecast").innerHTML = html;
 
 }catch(e){
-console.log("forecast error", e);
-document.getElementById("forecast").innerHTML = "Brak danych";
+document.getElementById("weatherBox").innerText="Brak danych";
 }
 }
+
+// AQI
+async function loadAQI(){
+try{
+const res = await fetch("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=53.1235&longitude=18.0084&current=pm10");
+const data = await res.json();
+
+document.getElementById("aqiValue").innerText = data.current.pm10;
+
+}catch(e){
+document.getElementById("aqiValue").innerText="--";
+}
+}
+
+// SUN
+async function loadSun(){
+try{
+const res = await fetch("https://wttr.in/Bydgoszcz?format=j1");
+const data = await res.json();
+
+const astro = data.weather[0].astronomy[0];
+
+document.getElementById("sunrise").innerText = "🌅 " + astro.sunrise;
+document.getElementById("sunset").innerText = "🌇 " + astro.sunset;
+
+}catch(e){}
+}
+
+// START
+loadWeather();
+loadAQI();
+loadSun();
+
+</script>
+
+</body>
+</html>
