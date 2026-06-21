@@ -11,7 +11,7 @@ font-family:Segoe UI;
 color:#fff;
 height:100vh;
 display:grid;
-grid-template-rows:150px 1fr 120px;
+grid-template-rows:180px 1fr 120px;
 gap:12px;
 padding:12px;
 background:#0b0f14;
@@ -29,12 +29,13 @@ box-shadow:0 10px 40px rgba(0,0,0,.5);
 /* TOP */
 #top{
 display:grid;
-grid-template-columns:2fr 2fr 1fr 1fr;
+grid-template-columns:2fr 1fr 1fr 1fr;
 gap:12px;
 }
 
 .widget{
-padding:14px;
+padding:10px;
+overflow:hidden;
 }
 
 /* VIEWER */
@@ -99,24 +100,24 @@ border:none;
 <!-- TOP -->
 <div id="top">
 
-<!-- 🌤 POGODA (NA 100% DZIAŁA) -->
+<!-- 🔥 POGODA (ŁADNA - WINDY) -->
 <div class="widget glass">
-<iframe src="https://wttr.in/Bydgoszcz?format=4"></iframe>
+
+<iframe src="https://embed.windy.com/embed2.html?lat=53.1235&lon=18.0084&detailLat=53.1235&detailLon=18.0084&width=650&height=300&zoom=8&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map"></iframe>
+
 </div>
 
-<!-- FORECAST -->
+<!-- placeholder -->
 <div class="widget glass">
-<iframe src="https://wttr.in/Bydgoszcz?0"></iframe>
+<div style="opacity:.7">Forecast</div>
 </div>
 
-<!-- AQI -->
 <div class="widget glass">
-<iframe src="https://wttr.in/Bydgoszcz?format=3"></iframe>
+<div style="opacity:.7">AQI</div>
 </div>
 
-<!-- SUN -->
 <div class="widget glass">
-<iframe src="https://wttr.in/Bydgoszcz?format=%S"></iframe>
+<div style="opacity:.7">Sun</div>
 </div>
 
 </div>
