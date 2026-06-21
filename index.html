@@ -15,32 +15,23 @@ grid-template-rows:150px 1fr 120px;
 gap:12px;
 padding:12px;
 
-/* 🔥 tło */
 background:
 radial-gradient(circle at 20% 20%, #1a2a3a, transparent),
 radial-gradient(circle at 80% 80%, #0a1a2a, transparent),
 #0b0f14;
 }
 
-/* 🔥 GLASS */
 .glass{
-background:linear-gradient(
-145deg,
-rgba(255,255,255,0.08),
-rgba(255,255,255,0.02)
-);
+background:linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02));
 backdrop-filter:blur(25px);
 border:1px solid rgba(255,255,255,0.12);
 border-radius:18px;
-box-shadow:
-0 10px 40px rgba(0,0,0,.5),
-inset 0 1px 0 rgba(255,255,255,0.1);
+box-shadow:0 10px 40px rgba(0,0,0,.5);
 }
 
-/* TOP */
 #top{
 display:grid;
-grid-template-columns:2fr 1fr 1fr 1fr;
+grid-template-columns:2fr 2fr 1fr 1fr;
 gap:12px;
 }
 
@@ -48,11 +39,42 @@ gap:12px;
 padding:14px;
 }
 
-/* SYSTEM VIEW */
+/* WEATHER */
+.weather{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.weather img{
+width:64px;
+}
+
+.weatherTemp{
+font-size:32px;
+font-weight:600;
+}
+
+/* FORECAST */
+.forecast{
+display:flex;
+justify-content:space-between;
+margin-top:10px;
+}
+
+.day{
+text-align:center;
+font-size:13px;
+}
+
+.day img{
+width:32px;
+}
+
+/* VIEWER */
 #viewer{
 position:relative;
 overflow:hidden;
-transition:0.4s;
 }
 
 .system{
@@ -62,7 +84,7 @@ height:100%;
 border:none;
 opacity:0;
 transform:scale(1.03);
-transition:opacity 0.5s ease, transform 0.5s ease;
+transition:0.5s;
 }
 
 .system.active{
@@ -84,71 +106,65 @@ align-items:center;
 justify-content:center;
 cursor:pointer;
 transition:0.3s;
-font-size:12px;
 gap:6px;
 }
 
-.tile:hover{
-transform:translateY(-4px);
-background:rgba(255,255,255,0.1);
-}
+.tile:hover{transform:translateY(-4px);}
 
 .tile.active{
 border:2px solid #00ff88;
 box-shadow:0 0 20px rgba(0,255,136,0.5);
 }
 
-/* IKONY */
-.icon{
-font-size:22px;
-}
-
-/* subtelny glow aktywnego */
-.tile.active .icon{
-filter:drop-shadow(0 0 6px #00ff88);
-}
+.icon{font-size:22px;}
 
 iframe{
 width:100%;
 height:100%;
 border:none;
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- 🔥 TOP -->
+<!-- TOP -->
 <div id="top">
 
-<!-- pogoda -->
+<!-- WEATHER -->
 <div class="widget glass">
-<div id="ww_f8f157805e891"></div>
-<script async src="https://app3.weatherwidget.org/js/?id=ww_f8f157805e891"></script>
+<div class="weather">
+<img id="weatherIcon">
+<div>
+<div class="weatherTemp" id="temp">--°C</div>
+<div id="desc"></div>
+<div style="font-size:12px;opacity:.6" id="details"></div>
+</div>
+</div>
 </div>
 
-<!-- forecast -->
+<!-- FORECAST -->
 <div class="widget glass">
-<div style="font-size:14px;opacity:.7">Prognoza</div>
-<div style="font-size:22px;">🌤 🌧 ☀️</div>
+<div style="opacity:.7">Prognoza 5 dni</div>
+<div class="forecast" id="forecast"></div>
 </div>
 
-<!-- air -->
+<!-- AQI -->
 <div class="widget glass">
-<div style="font-size:14px;opacity:.7">Powietrze</div>
-<div style="font-size:28px;color:#00ff88;">GOOD</div>
+<div>Powietrze</div>
+<div id="aqiValue" style="font-size:28px">--</div>
+<div id="aqiDesc" style="opacity:.7"></div>
 </div>
 
-<!-- sun -->
+<!-- SUN -->
 <div class="widget glass">
-<div>🌅 04:45</div>
-<div>🌇 21:05</div>
+<div id="sunrise">--</div>
+<div id="sunset">--</div>
 </div>
 
 </div>
 
-<!-- 🔥 VIEWER -->
+<!-- VIEWER -->
 <div id="viewer" class="glass">
 
 <iframe id="radar" class="system active"
@@ -159,36 +175,96 @@ src="https://www.its.bydgoszcz.pl/mapa"></iframe>
 
 </div>
 
-<!-- 🔥 BOTTOM -->
+<!-- BOTTOM -->
 <div id="bottom">
-
 <div class="tile glass active" onclick="show('radar', this)">
-<div class="icon">🌧</div>
-RADAR
-</div>
+<div class="icon">🌧</div>RADAR</div>
 
 <div class="tile glass" onclick="show('its', this)">
-<div class="icon">🚦</div>
-ITS
-</div>
-
+<div class="icon">🚦</div>ITS</div>
 </div>
 
 <script>
 
+// SWITCH
 function show(id, el){
-
-document.querySelectorAll(".system").forEach(s=>{
-s.classList.remove("active");
-});
+document.querySelectorAll(".system").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 
-document.querySelectorAll(".tile").forEach(t=>{
-t.classList.remove("active");
-});
+document.querySelectorAll(".tile").forEach(t=>t.classList.remove("active"));
 el.classList.add("active");
+}
+
+// 🌤 WEATHER + FORECAST
+async function loadWeather(){
+
+const url = "https://api.open-meteo.com/v1/forecast?latitude=53.1235&longitude=18.0084&current_weather=true&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,weathercode&timezone=auto";
+
+const res = await fetch(url);
+const data = await res.json();
+
+const w = data.current_weather;
+
+// CURRENT
+document.getElementById("temp").innerText = w.temperature + "°C";
+document.getElementById("details").innerText = "Wiatr: " + w.windspeed + " km/h";
+
+// ICON
+const icon = w.weathercode < 3
+? "https://cdn-icons-png.flaticon.com/512/869/869869.png"
+: "https://cdn-icons-png.flaticon.com/512/414/414825.png";
+
+document.getElementById("weatherIcon").src = icon;
+
+// FORECAST
+const days = data.daily.time;
+const max = data.daily.temperature_2m_max;
+const min = data.daily.temperature_2m_min;
+
+let html = "";
+
+for(let i=0;i<5;i++){
+html += `
+<div class="day">
+<div>${days[i].slice(5)}</div>
+<img src="${icon}">
+<div>${Math.round(max[i])}°</div>
+</div>`;
+}
+
+document.getElementById("forecast").innerHTML = html;
+
+// SUN
+document.getElementById("sunrise").innerText = "🌅 " + data.daily.sunrise[0].slice(11,16);
+document.getElementById("sunset").innerText = "🌇 " + data.daily.sunset[0].slice(11,16);
 
 }
+
+// 🌬 AQI
+async function loadAQI(){
+
+const url = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=53.1235&longitude=18.0084&current=pm10";
+
+const res = await fetch(url);
+const data = await res.json();
+
+const pm10 = data.current.pm10;
+
+let desc = "GOOD";
+let color = "#00ff88";
+
+if(pm10 > 50){desc="MODERATE"; color="yellow";}
+if(pm10 > 100){desc="BAD"; color="red";}
+
+document.getElementById("aqiValue").innerText = pm10;
+document.getElementById("aqiDesc").innerText = desc;
+document.getElementById("aqiValue").style.color = color;
+
+}
+
+// START
+loadWeather();
+loadAQI();
 
 </script>
 
