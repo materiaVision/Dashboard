@@ -48,16 +48,36 @@ gap:12px;
 width:60px;
 }
 
-/* FORECAST */
+/* 🔥 FORECAST PRO */
 .forecast{
 display:flex;
-justify-content:space-between;
+gap:10px;
 margin-top:10px;
 }
 
 .day{
+flex:1;
+padding:10px;
+border-radius:12px;
 text-align:center;
-font-size:13px;
+background:rgba(255,255,255,0.06);
+backdrop-filter:blur(10px);
+transition:0.3s;
+}
+
+.day:hover{
+transform:translateY(-5px);
+background:rgba(255,255,255,0.12);
+}
+
+.day img{
+width:32px;
+margin:5px 0;
+}
+
+.dayName{
+font-size:12px;
+opacity:.7;
 }
 
 /* VIEWER */
@@ -122,12 +142,12 @@ border:none;
 <!-- TOP -->
 <div id="top">
 
-<!-- 🌤 POGODA (PEWNA) -->
+<!-- 🌤 POGODA -->
 <div class="widget glass">
 <div id="weatherBox">Ładowanie pogody...</div>
 </div>
 
-<!-- forecast -->
+<!-- 🔥 FORECAST -->
 <div class="widget glass">
 <div>Prognoza</div>
 <div class="forecast" id="forecast"></div>
@@ -180,7 +200,10 @@ document.querySelectorAll(".tile").forEach(t=>t.classList.remove("active"));
 el.classList.add("active");
 }
 
-// 🌤 POGODA (WTTR — DZIAŁA ZAWSZE)
+// DNI TYGODNIA
+const daysPL = ["Nd","Pon","Wt","Śr","Czw","Pt","Sob"];
+
+// 🌤 WEATHER
 async function loadWeather(){
 try{
 const res = await fetch("https://wttr.in/Bydgoszcz?format=j1");
@@ -192,7 +215,6 @@ const temp = current.temp_C;
 const desc = current.weatherDesc[0].value;
 const icon = current.weatherIconUrl[0].value;
 
-// MAIN
 document.getElementById("weatherBox").innerHTML = `
 <div class="weather">
 <img src="${icon}">
@@ -203,24 +225,34 @@ document.getElementById("weatherBox").innerHTML = `
 </div>
 `;
 
-// FORECAST
-let html="";
-for(let i=0;i<3;i++){
+// 🔥 FORECAST PRO
+let html = "";
+
+for(let i=0;i<5;i++){
 const day = data.weather[i];
+
+const date = new Date(day.date);
+const dayName = daysPL[date.getDay()];
+
+const icon = day.hourly[4].weatherIconUrl[0].value;
+
 html += `
 <div class="day">
-<div>${day.date.slice(5)}</div>
+<div class="dayName">${dayName}</div>
+<img src="${icon}">
 <div>${day.avgtempC}°</div>
-</div>`;
+</div>
+`;
 }
+
 document.getElementById("forecast").innerHTML = html;
 
 }catch(e){
-document.getElementById("weatherBox").innerText="Brak danych pogodowych";
+document.getElementById("weatherBox").innerText="Brak danych";
 }
 }
 
-// 🌬 AQI
+// AQI
 async function loadAQI(){
 try{
 const res = await fetch("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=53.1235&longitude=18.0084&current=pm10");
@@ -233,7 +265,7 @@ document.getElementById("aqiValue").innerText="--";
 }
 }
 
-// 🌅 SUN (z wttr)
+// SUN
 async function loadSun(){
 try{
 const res = await fetch("https://wttr.in/Bydgoszcz?format=j1");
@@ -244,10 +276,7 @@ const astro = data.weather[0].astronomy[0];
 document.getElementById("sunrise").innerText = "🌅 " + astro.sunrise;
 document.getElementById("sunset").innerText = "🌇 " + astro.sunset;
 
-}catch(e){
-document.getElementById("sunrise").innerText="--";
-document.getElementById("sunset").innerText="--";
-}
+}catch(e){}
 }
 
 // START
