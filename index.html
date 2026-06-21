@@ -8,21 +8,22 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+
 body{
 margin:0;
 background:#0b0f14;
 color:#cfd8dc;
 font-family:Segoe UI;
 display:grid;
-grid-template-columns:280px 1fr 320px;
-grid-template-rows:60px 1fr 220px;
-gap:8px;
+grid-template-columns:260px 1fr 320px;
+grid-template-rows:50px 1fr 200px;
+gap:6px;
 height:100vh;
-padding:8px;
+padding:6px;
 }
 
-/* TOP BAR */
-#topbar{
+/* TOP */
+#top{
 grid-column:1/4;
 display:flex;
 justify-content:space-between;
@@ -30,95 +31,88 @@ align-items:center;
 padding:0 10px;
 background:#0f1620;
 border:1px solid rgba(255,255,255,.05);
-border-radius:8px;
 }
 
-/* PANELS */
+/* PANEL */
 .panel{
 background:#0f1620;
 border:1px solid rgba(255,255,255,.05);
-border-radius:8px;
-padding:8px;
+padding:6px;
 display:flex;
 flex-direction:column;
 }
 
-/* LEFT */
-#left{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:8px;}
-/* CENTER */
+/* LAYOUT */
+#left{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:6px;}
 #center{grid-column:2;grid-row:2;}
-/* RIGHT */
-#right{grid-column:3;grid-row:2;display:flex;flex-direction:column;gap:8px;}
-/* BOTTOM */
-#bottom{grid-column:1/4;grid-row:3;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+#right{grid-column:3;grid-row:2;display:flex;flex-direction:column;gap:6px;}
+#bottom{grid-column:1/4;grid-row:3;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
 
 h4{
-margin:0 0 6px 0;
-font-size:12px;
-color:#7f8c8d;
+margin:0 0 4px 0;
+font-size:11px;
+color:#6c7a89;
 }
 
+/* ASSET */
 .asset{
-display:flex;
-justify-content:space-between;
-font-size:13px;
+display:grid;
+grid-template-columns:60px 1fr 60px;
+align-items:center;
+font-size:12px;
+margin-bottom:4px;
 }
+
+canvas{height:30px!important;}
 
 .green{color:#00ff88;}
 .red{color:#ff3b3b;}
 
-canvas{height:40px!important;}
+iframe{width:100%;height:100%;border:none;}
 
-iframe{
-width:100%;
-height:100%;
-border:none;
-border-radius:6px;
-}
 </style>
 </head>
 
 <body>
 
-<!-- TOP -->
-<div id="topbar">
+<div id="top">
 <div id="clock"></div>
-<div>DASHBOARD TERMINAL</div>
+<div>TERMINAL</div>
 <div id="date"></div>
 </div>
 
-<!-- LEFT -->
 <div id="left">
 
 <div class="panel">
 <h4>CRYPTO</h4>
-<div class="asset"><span id="btcPrice"></span><span id="btcChange"></span></div>
+
+<div class="asset">
+<span>BTC</span>
 <canvas id="btcChart"></canvas>
-<div class="asset"><span id="ethPrice"></span><span id="ethChange"></span></div>
+<span id="btcChange"></span>
+</div>
+
+<div class="asset">
+<span>ETH</span>
 <canvas id="ethChart"></canvas>
+<span id="ethChange"></span>
+</div>
+
 </div>
 
 <div class="panel">
 <h4>INDICES</h4>
-<div class="asset">SP500 <span class="green">+0.48%</span></div>
-<div class="asset">NASDAQ <span class="green">+0.72%</span></div>
-<div class="asset">WIG20 <span class="green">+0.62%</span></div>
-</div>
-
-<div class="panel">
-<h4>FOREX</h4>
-<div class="asset">EUR/PLN <span>4.29</span></div>
-<div class="asset">USD/PLN <span>3.96</span></div>
+<div class="asset"><span>SPX</span><span></span><span class="green">+0.48%</span></div>
+<div class="asset"><span>NDQ</span><span></span><span class="green">+0.72%</span></div>
+<div class="asset"><span>WIG</span><span></span><span class="green">+0.62%</span></div>
 </div>
 
 </div>
 
-<!-- CENTER -->
 <div id="center" class="panel">
 <iframe src="https://embed.windy.com/embed2.html?lat=53.1&lon=18&zoom=6&overlay=radar"></iframe>
 </div>
 
-<!-- RIGHT -->
 <div id="right">
 
 <div class="panel">
@@ -133,7 +127,6 @@ border-radius:6px;
 
 </div>
 
-<!-- BOTTOM -->
 <div id="bottom">
 
 <div class="panel">
@@ -162,48 +155,47 @@ clock.innerText=d.toLocaleTimeString();
 date.innerText=d.toLocaleDateString();
 },1000);
 
-// CHART
+// CHARTS
 let btcData=[], ethData=[];
 
-let btcChart=new Chart(btcChart,{
+let btcChart=new Chart(document.getElementById("btcChart"),{
 type:"line",
 data:{labels:[],datasets:[{data:btcData,borderColor:"#00ff88"}]},
 options:{plugins:{legend:false},scales:{x:{display:false},y:{display:false}}}
 });
 
-let ethChart=new Chart(ethChart,{
+let ethChart=new Chart(document.getElementById("ethChart"),{
 type:"line",
 data:{labels:[],datasets:[{data:ethData,borderColor:"#00aaff"}]},
 options:{plugins:{legend:false},scales:{x:{display:false},y:{display:false}}}
 });
 
-// CRYPTO
-async function loadCrypto(){
+// DATA
+async function load(){
 let btc=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT").then(r=>r.json());
 let eth=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT").then(r=>r.json());
 
-let btcP=parseFloat(btc.lastPrice);
-let ethP=parseFloat(eth.lastPrice);
+let b=parseFloat(btc.lastPrice);
+let e=parseFloat(eth.lastPrice);
 
-btcPrice.innerText="BTC "+btcP.toFixed(0);
-btcChange.innerText=btc.priceChangePercent+"%";
-btcChange.className=btc.priceChangePercent>0?"green":"red";
+btcData.push(b);
+ethData.push(e);
 
-ethPrice.innerText="ETH "+ethP.toFixed(0);
-ethChange.innerText=eth.priceChangePercent+"%";
-ethChange.className=eth.priceChangePercent>0?"green":"red";
-
-btcData.push(btcP);
-ethData.push(ethP);
-
-if(btcData.length>30) btcData.shift();
-if(ethData.length>30) ethData.shift();
+if(btcData.length>40) btcData.shift();
+if(ethData.length>40) ethData.shift();
 
 btcChart.update();
 ethChart.update();
+
+btcChange.innerText=btc.priceChangePercent+"%";
+btcChange.className=btc.priceChangePercent>0?"green":"red";
+
+ethChange.innerText=eth.priceChangePercent+"%";
+ethChange.className=eth.priceChangePercent>0?"green":"red";
 }
-loadCrypto();
-setInterval(loadCrypto,4000);
+
+setInterval(load,3000);
+load();
 
 // NEWS
 fetch("https://api.allorigins.win/get?url="+encodeURIComponent("https://www.bankier.pl/rss/wiadomosci.xml"))
