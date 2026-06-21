@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard ULTRA</title>
+<title>Dashboard</title>
 
 <style>
 body{
@@ -19,8 +19,8 @@ background:#0b0f14;
 
 /* GLASS */
 .glass{
-background:linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02));
-backdrop-filter:blur(25px);
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(20px);
 border:1px solid rgba(255,255,255,0.12);
 border-radius:18px;
 box-shadow:0 10px 40px rgba(0,0,0,.5);
@@ -48,31 +48,27 @@ gap:12px;
 width:60px;
 }
 
-/* 🔥 FORECAST PRO */
+.weatherTemp{
+font-size:30px;
+}
+
+/* FORECAST */
 .forecast{
 display:flex;
-gap:10px;
+gap:8px;
 margin-top:10px;
 }
 
 .day{
 flex:1;
-padding:10px;
-border-radius:12px;
 text-align:center;
-background:rgba(255,255,255,0.06);
-backdrop-filter:blur(10px);
-transition:0.3s;
-}
-
-.day:hover{
-transform:translateY(-5px);
-background:rgba(255,255,255,0.12);
+padding:8px;
+border-radius:10px;
+background:rgba(255,255,255,0.05);
 }
 
 .day img{
-width:32px;
-margin:5px 0;
+width:30px;
 }
 
 .dayName{
@@ -117,7 +113,7 @@ gap:6px;
 }
 
 .tile:hover{
-transform:translateY(-5px);
+transform:translateY(-4px);
 }
 
 .tile.active{
@@ -144,10 +140,10 @@ border:none;
 
 <!-- 🌤 POGODA -->
 <div class="widget glass">
-<div id="weatherBox">Ładowanie pogody...</div>
+<div id="weatherBox">Ładowanie...</div>
 </div>
 
-<!-- 🔥 FORECAST -->
+<!-- FORECAST -->
 <div class="widget glass">
 <div>Prognoza</div>
 <div class="forecast" id="forecast"></div>
@@ -200,10 +196,10 @@ document.querySelectorAll(".tile").forEach(t=>t.classList.remove("active"));
 el.classList.add("active");
 }
 
-// DNI TYGODNIA
+// DNI
 const daysPL = ["Nd","Pon","Wt","Śr","Czw","Pt","Sob"];
 
-// 🌤 WEATHER
+// 🌤 WEATHER (PEWNE)
 async function loadWeather(){
 try{
 const res = await fetch("https://wttr.in/Bydgoszcz?format=j1");
@@ -211,21 +207,18 @@ const data = await res.json();
 
 const current = data.current_condition[0];
 
-const temp = current.temp_C;
-const desc = current.weatherDesc[0].value;
-const icon = current.weatherIconUrl[0].value;
-
+// MAIN
 document.getElementById("weatherBox").innerHTML = `
 <div class="weather">
-<img src="${icon}">
+<img src="${current.weatherIconUrl[0].value}">
 <div>
-<div style="font-size:28px">${temp}°C</div>
-<div style="opacity:.7">${desc}</div>
+<div class="weatherTemp">${current.temp_C}°C</div>
+<div style="opacity:.7">${current.weatherDesc[0].value}</div>
 </div>
 </div>
 `;
 
-// 🔥 FORECAST PRO
+// FORECAST
 let html = "";
 
 for(let i=0;i<5;i++){
@@ -234,7 +227,11 @@ const day = data.weather[i];
 const date = new Date(day.date);
 const dayName = daysPL[date.getDay()];
 
-const icon = day.hourly[4].weatherIconUrl[0].value;
+let icon = current.weatherIconUrl[0].value;
+
+if(day.hourly && day.hourly[0]){
+icon = day.hourly[0].weatherIconUrl[0].value;
+}
 
 html += `
 <div class="day">
@@ -248,11 +245,11 @@ html += `
 document.getElementById("forecast").innerHTML = html;
 
 }catch(e){
-document.getElementById("weatherBox").innerText="Brak danych";
+document.getElementById("weatherBox").innerText="Brak danych pogodowych";
 }
 }
 
-// AQI
+// 🌬 AQI
 async function loadAQI(){
 try{
 const res = await fetch("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=53.1235&longitude=18.0084&current=pm10");
@@ -265,7 +262,7 @@ document.getElementById("aqiValue").innerText="--";
 }
 }
 
-// SUN
+// 🌅 SUN
 async function loadSun(){
 try{
 const res = await fetch("https://wttr.in/Bydgoszcz?format=j1");
