@@ -14,21 +14,45 @@ display:grid;
 grid-template-rows:150px 1fr 120px;
 gap:12px;
 padding:12px;
+transition:background 1s ease;
 
+/* start */
+background:#0b0f14;
+}
+
+/* 🔥 dynamiczne tło */
+body.sunny{
 background:
-radial-gradient(circle at 20% 20%, #1a2a3a, transparent),
-radial-gradient(circle at 80% 80%, #0a1a2a, transparent),
+radial-gradient(circle at 20% 20%, #ffb74d, transparent),
+radial-gradient(circle at 80% 80%, #ff7043, transparent),
 #0b0f14;
 }
 
+body.cloudy{
+background:
+radial-gradient(circle at 20% 20%, #607d8b, transparent),
+radial-gradient(circle at 80% 80%, #455a64, transparent),
+#0b0f14;
+}
+
+body.rain{
+background:
+radial-gradient(circle at 20% 20%, #2196f3, transparent),
+radial-gradient(circle at 80% 80%, #0d47a1, transparent),
+#0b0f14;
+}
+
+/* GLASS */
 .glass{
 background:linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02));
 backdrop-filter:blur(25px);
 border:1px solid rgba(255,255,255,0.12);
 border-radius:18px;
 box-shadow:0 10px 40px rgba(0,0,0,.5);
+transition:0.3s;
 }
 
+/* TOP */
 #top{
 display:grid;
 grid-template-columns:2fr 2fr 1fr 1fr;
@@ -37,6 +61,7 @@ gap:12px;
 
 .widget{
 padding:14px;
+animation:fadeIn 1s ease;
 }
 
 /* WEATHER */
@@ -48,11 +73,16 @@ gap:15px;
 
 .weather img{
 width:64px;
+animation:float 3s ease-in-out infinite;
+}
+
+@keyframes float{
+0%,100%{transform:translateY(0);}
+50%{transform:translateY(-6px);}
 }
 
 .weatherTemp{
 font-size:32px;
-font-weight:600;
 }
 
 /* FORECAST */
@@ -67,10 +97,6 @@ text-align:center;
 font-size:13px;
 }
 
-.day img{
-width:32px;
-}
-
 /* VIEWER */
 #viewer{
 position:relative;
@@ -83,7 +109,7 @@ width:100%;
 height:100%;
 border:none;
 opacity:0;
-transform:scale(1.03);
+transform:scale(1.05);
 transition:0.5s;
 }
 
@@ -109,62 +135,70 @@ transition:0.3s;
 gap:6px;
 }
 
-.tile:hover{transform:translateY(-4px);}
+.tile:hover{
+transform:translateY(-6px) scale(1.03);
+}
 
 .tile.active{
 border:2px solid #00ff88;
-box-shadow:0 0 20px rgba(0,255,136,0.5);
+box-shadow:0 0 25px rgba(0,255,136,0.6);
 }
 
-.icon{font-size:22px;}
+.icon{
+font-size:22px;
+animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+0%,100%{opacity:1;}
+50%{opacity:0.6;}
+}
 
 iframe{
 width:100%;
 height:100%;
 border:none;
 }
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(10px);}
+to{opacity:1;}
+}
+
 </style>
 </head>
 
 <body>
 
-<!-- TOP -->
 <div id="top">
 
-<!-- WEATHER -->
 <div class="widget glass">
 <div class="weather">
 <img id="weatherIcon">
 <div>
 <div class="weatherTemp" id="temp">--°C</div>
 <div id="desc"></div>
-<div style="font-size:12px;opacity:.6" id="details"></div>
 </div>
 </div>
 </div>
 
-<!-- FORECAST -->
 <div class="widget glass">
-<div style="opacity:.7">Prognoza 5 dni</div>
+<div>Prognoza</div>
 <div class="forecast" id="forecast"></div>
 </div>
 
-<!-- AQI -->
 <div class="widget glass">
 <div>Powietrze</div>
-<div id="aqiValue" style="font-size:28px">--</div>
-<div id="aqiDesc" style="opacity:.7"></div>
+<div id="aqiValue">--</div>
 </div>
 
-<!-- SUN -->
 <div class="widget glass">
-<div id="sunrise">--</div>
-<div id="sunset">--</div>
+<div id="sunrise"></div>
+<div id="sunset"></div>
 </div>
 
 </div>
 
-<!-- VIEWER -->
 <div id="viewer" class="glass">
 
 <iframe id="radar" class="system active"
@@ -175,13 +209,14 @@ src="https://www.its.bydgoszcz.pl/mapa"></iframe>
 
 </div>
 
-<!-- BOTTOM -->
 <div id="bottom">
+
 <div class="tile glass active" onclick="show('radar', this)">
 <div class="icon">🌧</div>RADAR</div>
 
 <div class="tile glass" onclick="show('its', this)">
 <div class="icon">🚦</div>ITS</div>
+
 </div>
 
 <script>
@@ -195,70 +230,52 @@ document.querySelectorAll(".tile").forEach(t=>t.classList.remove("active"));
 el.classList.add("active");
 }
 
-// 🌤 WEATHER + FORECAST
+// WEATHER
 async function loadWeather(){
 
-const url = "https://api.open-meteo.com/v1/forecast?latitude=53.1235&longitude=18.0084&current_weather=true&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,weathercode&timezone=auto";
-
-const res = await fetch(url);
+const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=53.1235&longitude=18.0084&current_weather=true&daily=temperature_2m_max,sunrise,sunset,weathercode&timezone=auto");
 const data = await res.json();
 
 const w = data.current_weather;
 
-// CURRENT
 document.getElementById("temp").innerText = w.temperature + "°C";
-document.getElementById("details").innerText = "Wiatr: " + w.windspeed + " km/h";
 
-// ICON
+// klimat
+if(w.weathercode < 2){
+document.body.className = "sunny";
+}else if(w.weathercode < 4){
+document.body.className = "cloudy";
+}else{
+document.body.className = "rain";
+}
+
+// ikonka
 const icon = w.weathercode < 3
 ? "https://cdn-icons-png.flaticon.com/512/869/869869.png"
 : "https://cdn-icons-png.flaticon.com/512/414/414825.png";
 
 document.getElementById("weatherIcon").src = icon;
 
-// FORECAST
-const days = data.daily.time;
-const max = data.daily.temperature_2m_max;
-const min = data.daily.temperature_2m_min;
-
-let html = "";
-
+// forecast
+let html="";
 for(let i=0;i<5;i++){
-html += `
-<div class="day">
-<div>${days[i].slice(5)}</div>
-<img src="${icon}">
-<div>${Math.round(max[i])}°</div>
-</div>`;
+html += `<div class="day">${Math.round(data.daily.temperature_2m_max[i])}°</div>`;
 }
-
 document.getElementById("forecast").innerHTML = html;
 
-// SUN
+// sun
 document.getElementById("sunrise").innerText = "🌅 " + data.daily.sunrise[0].slice(11,16);
 document.getElementById("sunset").innerText = "🌇 " + data.daily.sunset[0].slice(11,16);
 
 }
 
-// 🌬 AQI
+// AQI
 async function loadAQI(){
-
-const url = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=53.1235&longitude=18.0084&current=pm10";
-
-const res = await fetch(url);
+const res = await fetch("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=53.1235&longitude=18.0084&current=pm10");
 const data = await res.json();
 
-const pm10 = data.current.pm10;
-
-let desc = "GOOD";
-let color = "#00ff88";
-
-if(pm10 > 50){desc="MODERATE"; color="yellow";}
-if(pm10 > 100){desc="BAD"; color="red";}
-
-document.getElementById("aqiValue").innerText = pm10;
-document.getElementById("aqiDesc").innerText = desc;
-document.getElementById("aqiValue").style.color = color;
+const val = data.current.pm10;
+document.getElementById("aqiValue").innerText = val;
 
 }
 
