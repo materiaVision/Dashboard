@@ -7,10 +7,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- MAPBOX -->
-<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-
 <style>
 body{
 margin:0;
@@ -68,19 +64,39 @@ margin-bottom:4px;
 canvas{height:28px!important;}
 
 /* MAP */
-#map{
-width:100%;
-height:100%;
-border-radius:4px;
-}
-
-/* GRID overlay */
 #mapWrapper{
 position:relative;
 width:100%;
 height:100%;
+overflow:hidden;
+border-radius:4px;
 }
 
+#map{
+width:100%;
+height:100%;
+filter:brightness(0.6) contrast(1.2);
+}
+
+/* TRAFFIC LINES */
+.road{
+position:absolute;
+height:2px;
+border-radius:2px;
+animation:flow 2s linear infinite;
+}
+
+.greenLine{background:#00ff88;}
+.yellowLine{background:#ffee00;}
+.redLine{background:#ff0000;}
+
+@keyframes flow{
+0%{opacity:0.3;}
+50%{opacity:1;}
+100%{opacity:0.3;}
+}
+
+/* GRID overlay */
 #mapWrapper::after{
 content:"";
 position:absolute;
@@ -168,9 +184,19 @@ style="width:100%;height:100%;border:none;filter:brightness(0.8);"></iframe>
 <div id="bottom">
 
 <div class="panel">
-<h4>TRAFFIC (LIVE)</h4>
+<h4>TRAFFIC (BYDGOSZCZ)</h4>
 <div id="mapWrapper">
-<div id="map"></div>
+
+<iframe id="map"
+src="https://www.openstreetmap.org/export/embed.html?bbox=17.9%2C52.95%2C18.2%2C53.2&layer=mapnik">
+</iframe>
+
+<!-- FAKE TRAFFIC -->
+<div class="road greenLine" style="top:40%; left:10%; width:70%;"></div>
+<div class="road yellowLine" style="top:55%; left:20%; width:50%;"></div>
+<div class="road redLine" style="top:65%; left:30%; width:40%;"></div>
+<div class="road redLine" style="top:48%; left:50%; width:30%;"></div>
+
 </div>
 </div>
 
@@ -217,45 +243,6 @@ new Chart(document.getElementById("solChart"),{
 type:"line",
 data:{labels:[],datasets:[{data:genData(),borderColor:"#ffaa00"}]},
 options:{plugins:{legend:false},scales:{x:{display:false},y:{display:false}}}
-});
-
-// MAPBOX
-mapboxgl.accessToken = 'TU_WSTAW_TOKEN';
-
-const map = new mapboxgl.Map({
-container: 'map',
-style: 'mapbox://styles/mapbox/dark-v11',
-center: [18.0084, 53.1235],
-zoom: 11
-});
-
-map.on('load', () => {
-
-// TRAFFIC LAYER
-map.addSource('traffic', {
-type: 'vector',
-url: 'mapbox://mapbox.mapbox-traffic-v1'
-});
-
-map.addLayer({
-'id': 'traffic',
-'type': 'line',
-'source': 'traffic',
-'source-layer': 'traffic',
-'paint': {
-'line-width': 2,
-'line-color': [
-'match',
-['get', 'congestion'],
-'low', '#00ff88',
-'moderate', '#ffee00',
-'heavy', '#ff8800',
-'severe', '#ff0000',
-'#00ff88'
-]
-}
-});
-
 });
 
 </script>
