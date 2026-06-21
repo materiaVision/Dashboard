@@ -15,12 +15,10 @@ grid-template-rows:150px 1fr 120px;
 gap:12px;
 padding:12px;
 transition:background 1s ease;
-
-/* start */
 background:#0b0f14;
 }
 
-/* 🔥 dynamiczne tło */
+/* 🌈 KLIMAT */
 body.sunny{
 background:
 radial-gradient(circle at 20% 20%, #ffb74d, transparent),
@@ -49,7 +47,6 @@ backdrop-filter:blur(25px);
 border:1px solid rgba(255,255,255,0.12);
 border-radius:18px;
 box-shadow:0 10px 40px rgba(0,0,0,.5);
-transition:0.3s;
 }
 
 /* TOP */
@@ -61,7 +58,6 @@ gap:12px;
 
 .widget{
 padding:14px;
-animation:fadeIn 1s ease;
 }
 
 /* WEATHER */
@@ -159,17 +155,12 @@ width:100%;
 height:100%;
 border:none;
 }
-
-@keyframes fadeIn{
-from{opacity:0;transform:translateY(10px);}
-to{opacity:1;}
-}
-
 </style>
 </head>
 
 <body>
 
+<!-- TOP -->
 <div id="top">
 
 <div class="widget glass">
@@ -177,7 +168,7 @@ to{opacity:1;}
 <img id="weatherIcon">
 <div>
 <div class="weatherTemp" id="temp">--°C</div>
-<div id="desc"></div>
+<div id="desc">Ładowanie...</div>
 </div>
 </div>
 </div>
@@ -193,12 +184,13 @@ to{opacity:1;}
 </div>
 
 <div class="widget glass">
-<div id="sunrise"></div>
-<div id="sunset"></div>
+<div id="sunrise">--</div>
+<div id="sunset">--</div>
 </div>
 
 </div>
 
+<!-- VIEWER -->
 <div id="viewer" class="glass">
 
 <iframe id="radar" class="system active"
@@ -209,13 +201,18 @@ src="https://www.its.bydgoszcz.pl/mapa"></iframe>
 
 </div>
 
+<!-- BOTTOM -->
 <div id="bottom">
 
 <div class="tile glass active" onclick="show('radar', this)">
-<div class="icon">🌧</div>RADAR</div>
+<div class="icon">🌧</div>
+RADAR
+</div>
 
 <div class="tile glass" onclick="show('its', this)">
-<div class="icon">🚦</div>ITS</div>
+<div class="icon">🚦</div>
+ITS
+</div>
 
 </div>
 
@@ -232,7 +229,7 @@ el.classList.add("active");
 
 // WEATHER
 async function loadWeather(){
-
+try{
 const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=53.1235&longitude=18.0084&current_weather=true&daily=temperature_2m_max,sunrise,sunset,weathercode&timezone=auto");
 const data = await res.json();
 
@@ -240,43 +237,55 @@ const w = data.current_weather;
 
 document.getElementById("temp").innerText = w.temperature + "°C";
 
-// klimat
+// KLIMAT FIX
+document.body.classList.remove("sunny","cloudy","rain");
+
 if(w.weathercode < 2){
-document.body.className = "sunny";
+document.body.classList.add("sunny");
 }else if(w.weathercode < 4){
-document.body.className = "cloudy";
+document.body.classList.add("cloudy");
 }else{
-document.body.className = "rain";
+document.body.classList.add("rain");
 }
 
-// ikonka
+// ICON
 const icon = w.weathercode < 3
 ? "https://cdn-icons-png.flaticon.com/512/869/869869.png"
 : "https://cdn-icons-png.flaticon.com/512/414/414825.png";
 
 document.getElementById("weatherIcon").src = icon;
 
-// forecast
+// DESC
+document.getElementById("desc").innerText = "Warunki aktualne";
+
+// FORECAST
 let html="";
 for(let i=0;i<5;i++){
 html += `<div class="day">${Math.round(data.daily.temperature_2m_max[i])}°</div>`;
 }
 document.getElementById("forecast").innerHTML = html;
 
-// sun
+// SUN
 document.getElementById("sunrise").innerText = "🌅 " + data.daily.sunrise[0].slice(11,16);
 document.getElementById("sunset").innerText = "🌇 " + data.daily.sunset[0].slice(11,16);
 
+}catch(e){
+document.getElementById("temp").innerText="--°C";
+document.getElementById("desc").innerText="Brak danych";
+}
 }
 
 // AQI
 async function loadAQI(){
+try{
 const res = await fetch("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=53.1235&longitude=18.0084&current=pm10");
 const data = await res.json();
 
-const val = data.current.pm10;
-document.getElementById("aqiValue").innerText = val;
+document.getElementById("aqiValue").innerText = data.current.pm10;
 
+}catch(e){
+document.getElementById("aqiValue").innerText="--";
+}
 }
 
 // START
