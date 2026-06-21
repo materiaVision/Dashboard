@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard ITS</title>
+<title>Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -11,8 +11,8 @@
 body{
 margin:0;
 background:#0b0f14;
-font-family:Segoe UI, sans-serif;
-color:#cfd8dc;
+font-family:Segoe UI;
+color:#fff;
 display:grid;
 grid-template-columns:260px 1fr 320px;
 grid-template-rows:50px 1fr 200px;
@@ -28,58 +28,34 @@ justify-content:space-between;
 align-items:center;
 padding:0 12px;
 background:#0f1620;
-border:1px solid rgba(255,255,255,0.05);
-font-size:13px;
+border:1px solid rgba(255,255,255,.05);
 }
 
 .panel{
 background:#0f1620;
-border:1px solid rgba(255,255,255,0.05);
+border:1px solid rgba(255,255,255,.05);
 padding:6px;
-display:flex;
-flex-direction:column;
+overflow:hidden;
 }
 
 #left{display:flex;flex-direction:column;gap:6px;}
 #right{display:flex;flex-direction:column;gap:6px;}
 #bottom{grid-column:1/4;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
 
-h4{
-margin:0 0 4px 0;
-font-size:11px;
-color:#6c7a89;
-}
-
-.asset{
-display:grid;
-grid-template-columns:60px 1fr 60px;
-align-items:center;
-font-size:12px;
-margin-bottom:4px;
-}
-
-.green{color:#00ff88;}
-.red{color:#ff3b3b;}
-
-canvas{height:28px!important;}
-
 iframe{
 width:100%;
 height:100%;
 border:none;
-filter:brightness(0.8);
 }
 
-/* fallback message */
-.fallback{
+/* fallback */
+.centerMsg{
 display:flex;
-flex-direction:column;
 justify-content:center;
 align-items:center;
 height:100%;
+opacity:.7;
 text-align:center;
-font-size:13px;
-opacity:0.8;
 }
 </style>
 </head>
@@ -88,96 +64,45 @@ opacity:0.8;
 
 <div id="top">
 <div id="clock"></div>
-<div>GLOBAL TERMINAL</div>
+<div>TERMINAL</div>
 <div id="date"></div>
 </div>
 
 <div id="left">
 
-<div class="panel">
-<h4>CRYPTO</h4>
-
-<div class="asset">
-<span>BTC</span>
-<canvas id="btcChart"></canvas>
-<span class="green">+1.23%</span>
-</div>
-
-<div class="asset">
-<span>ETH</span>
-<canvas id="ethChart"></canvas>
-<span class="red">-0.45%</span>
-</div>
-
-<div class="asset">
-<span>SOL</span>
-<canvas id="solChart"></canvas>
-<span class="green">+3.12%</span>
-</div>
+<div class="panel">CRYPTO</div>
+<div class="panel">INDICES</div>
 
 </div>
 
 <div class="panel">
-<h4>INDICES</h4>
-<div class="asset"><span>SPX</span><span></span><span class="green">+0.48%</span></div>
-<div class="asset"><span>NDQ</span><span></span><span class="green">+0.72%</span></div>
-<div class="asset"><span>WIG</span><span></span><span class="green">+0.62%</span></div>
-</div>
-
-</div>
-
-<!-- RADAR -->
-<div id="center" class="panel">
 <iframe src="https://embed.windy.com/embed2.html?lat=50&lon=15&zoom=5&overlay=radar"></iframe>
 </div>
 
 <div id="right">
 
-<div class="panel">
-<h4>NEWS</h4>
-<ul>
-<li>Market rises on strong earnings</li>
-<li>Inflation data surprises analysts</li>
-<li>Tech stocks lead rally</li>
-<li>Crypto volatility continues</li>
-</ul>
-</div>
-
-<div class="panel">
-<h4>AIR</h4>
-<div>PM2.5: 42</div>
-</div>
+<div class="panel">NEWS</div>
+<div class="panel">AIR</div>
 
 </div>
 
-<!-- BOTTOM -->
 <div id="bottom">
 
+<!-- TRAFFIC -->
 <div class="panel">
-<h4>TRAFFIC (ITS BYDGOSZCZ)</h4>
 
-<!-- PRÓBA OSADZENIA -->
-<iframe 
-src="https://www.its.bydgoszcz.pl/"
-onerror="showFallback()">
-</iframe>
-
-<div id="fallback" class="fallback" style="display:none;">
-<p>ITS blokuje osadzanie mapy 🚫</p>
-<p>Otwórz ręcznie:</p>
-<p><b>its.bydgoszcz.pl</b></p>
+<div id="itsBox" class="centerMsg">
+Ładowanie ITS...
 </div>
 
 </div>
 
 <div class="panel">
-<h4>FLIGHTS</h4>
 <iframe src="https://globe.adsbexchange.com/"></iframe>
 </div>
 
 <div class="panel">
-<h4>SUN</h4>
-<div>↑ 05:01 ↓ 20:45</div>
+SUN
 </div>
 
 </div>
@@ -191,34 +116,19 @@ clock.innerText=d.toLocaleTimeString();
 date.innerText=d.toLocaleDateString();
 },1000);
 
-// fallback
-function showFallback(){
-document.querySelector("iframe").style.display="none";
-document.getElementById("fallback").style.display="flex";
-}
+// SAFE ITS LOAD
+const its = document.createElement("iframe");
+its.src = "https://www.its.bydgoszcz.pl/";
 
-// CHARTS
-function genData(){
-return Array.from({length:30},()=>Math.random()*100);
-}
+its.onload = () => {
+document.getElementById("itsBox").innerHTML="";
+document.getElementById("itsBox").appendChild(its);
+};
 
-new Chart(document.getElementById("btcChart"),{
-type:"line",
-data:{labels:[],datasets:[{data:genData(),borderColor:"#00ff88"}]},
-options:{plugins:{legend:false},scales:{x:{display:false},y:{display:false}}}
-});
-
-new Chart(document.getElementById("ethChart"),{
-type:"line",
-data:{labels:[],datasets:[{data:genData(),borderColor:"#00aaff"}]},
-options:{plugins:{legend:false},scales:{x:{display:false},y:{display:false}}}
-});
-
-new Chart(document.getElementById("solChart"),{
-type:"line",
-data:{labels:[],datasets:[{data:genData(),borderColor:"#ffaa00"}]},
-options:{plugins:{legend:false},scales:{x:{display:false},y:{display:false}}}
-});
+its.onerror = () => {
+document.getElementById("itsBox").innerHTML =
+"ITS blokuje osadzanie 🚫<br>Wejdź ręcznie: its.bydgoszcz.pl";
+};
 
 </script>
 
