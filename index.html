@@ -7,60 +7,42 @@
 <style>
 body{
 margin:0;
-background:#0b0f14;
+background:linear-gradient(135deg,#0b0f14,#0f1a25);
 font-family:Segoe UI;
 color:#fff;
 display:grid;
-grid-template-rows:140px 1fr 120px;
-gap:8px;
+grid-template-rows:150px 1fr 120px;
+gap:10px;
 height:100vh;
-padding:8px;
+padding:10px;
 }
 
-/* TOP WIDGETY */
+/* 🔥 GLASS */
+.widget, #viewer, .tile{
+background:rgba(255,255,255,0.06);
+backdrop-filter:blur(18px);
+border:1px solid rgba(255,255,255,0.12);
+border-radius:16px;
+box-shadow:0 8px 30px rgba(0,0,0,.4);
+}
+
+/* TOP */
 #top{
 display:grid;
 grid-template-columns:2fr 1fr 1fr 1fr;
-gap:8px;
+gap:10px;
 }
 
 .widget{
-background:#111826;
-border-radius:14px;
 padding:12px;
 display:flex;
 flex-direction:column;
 justify-content:center;
 }
 
-/* pogoda */
-.weatherMain{
-display:flex;
-align-items:center;
-gap:15px;
-font-size:18px;
-}
-
-.weatherMain img{
-width:60px;
-}
-
-/* FORECAST */
-.forecast{
-display:flex;
-justify-content:space-between;
-font-size:13px;
-}
-
-.forecast div{
-text-align:center;
-}
-
 /* SYSTEM VIEW */
 #viewer{
 position:relative;
-background:#000;
-border-radius:14px;
 overflow:hidden;
 }
 
@@ -70,14 +52,14 @@ width:100%;
 height:100%;
 border:none;
 opacity:0;
-transition:opacity 0.4s;
+transition:opacity 0.5s ease;
 }
 
 .system.active{
 opacity:1;
 }
 
-/* BOTTOM MENU */
+/* BOTTOM */
 #bottom{
 display:flex;
 gap:10px;
@@ -85,21 +67,21 @@ gap:10px;
 
 .tile{
 flex:1;
-background:#111826;
-border-radius:12px;
 display:flex;
 align-items:center;
 justify-content:center;
 cursor:pointer;
-transition:0.2s;
+transition:0.25s;
+font-weight:500;
 }
 
 .tile:hover{
-background:#1a2333;
+background:rgba(255,255,255,0.12);
 }
 
 .tile.active{
 border:2px solid #00ff88;
+box-shadow:0 0 15px rgba(0,255,136,0.4);
 }
 
 </style>
@@ -110,28 +92,26 @@ border:2px solid #00ff88;
 <!-- 🔥 TOP -->
 <div id="top">
 
-<!-- pogoda -->
+<!-- 🌤 WIDGET POGODOWY (TEN ZE ZDJĘCIA - DZIAŁAJĄCY) -->
 <div class="widget">
-<div class="weatherMain">
-<img src="https://cdn-icons-png.flaticon.com/512/869/869869.png">
-<div>
-<div style="font-size:28px;">22°C</div>
-<div>Bydgoszcz</div>
-</div>
-</div>
+
+<div id="ww_f8f157805e891" v='1.3' loc='id' a='{"t":"horizontal","lang":"pl","sl_lpl":1,"ids":[],"font":"Arial","sl_ics":"one_a","sl_sot":"celsius","cl_bkg":"image","cl_font":"#FFFFFF","cl_cloud":"#FFFFFF","cl_persp":"#81D4FA","cl_sun":"#FFC107","cl_moon":"#FFC107","cl_thund":"#FF5722"}'>
 </div>
 
-<!-- forecast -->
-<div class="widget forecast">
-<div>🌤<br>23°</div>
-<div>🌧<br>19°</div>
-<div>☀️<br>25°</div>
+<script async src="https://app3.weatherwidget.org/js/?id=ww_f8f157805e891"></script>
+
+</div>
+
+<!-- forecast (na razie placeholder) -->
+<div class="widget">
+<div style="font-size:14px;">Prognoza</div>
+<div style="font-size:20px;">🌤 🌧 ☀️</div>
 </div>
 
 <!-- air -->
 <div class="widget">
 <div style="font-size:14px;">Jakość powietrza</div>
-<div style="font-size:26px;color:#00ff88;">GOOD</div>
+<div style="font-size:28px;color:#00ff88;">GOOD</div>
 </div>
 
 <!-- sun -->
@@ -170,13 +150,11 @@ ITS
 
 function show(id, el){
 
-// zmiana systemu
 document.querySelectorAll(".system").forEach(s=>{
 s.classList.remove("active");
 });
 document.getElementById(id).classList.add("active");
 
-// zmiana tile
 document.querySelectorAll(".tile").forEach(t=>{
 t.classList.remove("active");
 });
