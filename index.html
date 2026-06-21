@@ -53,7 +53,6 @@ font-size:11px;
 color:#6c7a89;
 }
 
-/* ASSET */
 .asset{
 display:grid;
 grid-template-columns:60px 1fr 60px;
@@ -62,33 +61,50 @@ font-size:12px;
 margin-bottom:4px;
 }
 
-/* COLORS */
 .green{color:#00ff88;}
 .red{color:#ff3b3b;}
 
-/* CHART */
 canvas{height:28px!important;}
 
-/* IFRAME */
-iframe{
+/* MAP */
+#trafficMap{
 width:100%;
 height:100%;
-border:none;
-filter:brightness(0.8) contrast(1.2);
+border-radius:4px;
+filter:brightness(0.75) contrast(1.2) saturate(0.7);
+}
+
+/* subtle grid overlay for terminal vibe */
+#trafficWrapper{
+position:relative;
+width:100%;
+height:100%;
+}
+
+#trafficWrapper::after{
+content:"";
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background-image:
+linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+background-size:40px 40px;
+pointer-events:none;
 }
 </style>
 </head>
 
 <body>
 
-<!-- TOP -->
 <div id="top">
 <div id="clock"></div>
 <div>GLOBAL TERMINAL</div>
 <div id="date"></div>
 </div>
 
-<!-- LEFT -->
 <div id="left">
 
 <div class="panel">
@@ -123,12 +139,11 @@ filter:brightness(0.8) contrast(1.2);
 
 </div>
 
-<!-- CENTER -->
+<!-- RADAR -->
 <div id="center" class="panel">
-<iframe src="https://embed.windy.com/embed2.html?lat=50&lon=15&zoom=5&level=surface&overlay=radar&menu=&message=false"></iframe>
+<iframe src="https://embed.windy.com/embed2.html?lat=50&lon=15&zoom=5&overlay=radar" style="width:100%;height:100%;border:none;filter:brightness(0.8);"></iframe>
 </div>
 
-<!-- RIGHT -->
 <div id="right">
 
 <div class="panel">
@@ -153,12 +168,14 @@ filter:brightness(0.8) contrast(1.2);
 
 <div class="panel">
 <h4>TRAFFIC (LIVE)</h4>
-<iframe src="https://api.maptiler.com/maps/darkmatter/?key=kAhSd69fgZC0ejlIPbcS#9/53.1235/18.0084"></iframe>
+<div id="trafficWrapper">
+<div id="trafficMap"></div>
+</div>
 </div>
 
 <div class="panel">
 <h4>FLIGHTS</h4>
-<iframe src="https://globe.adsbexchange.com/"></iframe>
+<iframe src="https://globe.adsbexchange.com/" style="width:100%;height:100%;border:none;filter:brightness(0.8);"></iframe>
 </div>
 
 <div class="panel">
@@ -177,7 +194,7 @@ clock.innerText=d.toLocaleTimeString();
 date.innerText=d.toLocaleDateString();
 },1000);
 
-// FAKE CHARTS
+// CHARTS
 function genData(){
 return Array.from({length:30},()=>Math.random()*100);
 }
@@ -200,6 +217,28 @@ data:{labels:[],datasets:[{data:genData(),borderColor:"#ffaa00"}]},
 options:{plugins:{legend:false},scales:{x:{display:false},y:{display:false}}}
 });
 
+// GOOGLE MAPS (DARK + TRAFFIC)
+function initMap(){
+const map = new google.maps.Map(document.getElementById("trafficMap"), {
+center: { lat: 53.1235, lng: 18.0084 },
+zoom: 12,
+disableDefaultUI: true,
+styles: [
+{ elementType: "geometry", stylers: [{ color: "#0b0f14" }] },
+{ elementType: "labels.text.fill", stylers: [{ color: "#5f7a8c" }] },
+{ elementType: "labels.text.stroke", stylers: [{ color: "#0b0f14" }] },
+{ featureType: "road", elementType: "geometry", stylers: [{ color: "#1f2a36" }] }
+]
+});
+
+const trafficLayer = new google.maps.TrafficLayer();
+trafficLayer.setMap(map);
+}
+</script>
+
+<!-- 🔑 TU WKLEJ SWÓJ KLUCZ -->
+<script async defer
+src="https://maps.googleapis.com/maps/api/js?key=AlzaSyDUW0vyP0KQoT6m1nHlm_c8hB6aKR3ILMY&callback=initMap">
 </script>
 
 </body>
