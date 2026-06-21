@@ -8,12 +8,11 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-
 body{
 margin:0;
 background:#0b0f14;
+font-family:Segoe UI, sans-serif;
 color:#cfd8dc;
-font-family:Segoe UI;
 display:grid;
 grid-template-columns:260px 1fr 320px;
 grid-template-rows:50px 1fr 200px;
@@ -28,25 +27,25 @@ grid-column:1/4;
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:0 10px;
+padding:0 12px;
 background:#0f1620;
-border:1px solid rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,0.05);
+font-size:13px;
 }
 
 /* PANEL */
 .panel{
 background:#0f1620;
-border:1px solid rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,0.05);
 padding:6px;
 display:flex;
 flex-direction:column;
 }
 
 /* LAYOUT */
-#left{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:6px;}
-#center{grid-column:2;grid-row:2;}
-#right{grid-column:3;grid-row:2;display:flex;flex-direction:column;gap:6px;}
-#bottom{grid-column:1/4;grid-row:3;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+#left{display:flex;flex-direction:column;gap:6px;}
+#right{display:flex;flex-direction:column;gap:6px;}
+#bottom{grid-column:1/4;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
 
 h4{
 margin:0 0 4px 0;
@@ -63,24 +62,39 @@ font-size:12px;
 margin-bottom:4px;
 }
 
-canvas{height:30px!important;}
-
+/* COLORS */
 .green{color:#00ff88;}
 .red{color:#ff3b3b;}
 
-iframe{width:100%;height:100%;border:none;}
+/* CHART */
+canvas{height:28px!important;}
 
+/* FAKE MAP */
+.fakeMap{
+background:linear-gradient(180deg,#1c2733,#0b0f14);
+height:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+color:#555;
+font-size:14px;
+}
+
+/* GRID AREAS */
+#center{background:#0f1620;border:1px solid rgba(255,255,255,0.05);}
 </style>
 </head>
 
 <body>
 
+<!-- TOP -->
 <div id="top">
 <div id="clock"></div>
-<div>TERMINAL</div>
+<div>GLOBAL TERMINAL</div>
 <div id="date"></div>
 </div>
 
+<!-- LEFT -->
 <div id="left">
 
 <div class="panel">
@@ -89,13 +103,19 @@ iframe{width:100%;height:100%;border:none;}
 <div class="asset">
 <span>BTC</span>
 <canvas id="btcChart"></canvas>
-<span id="btcChange"></span>
+<span class="green">+1.23%</span>
 </div>
 
 <div class="asset">
 <span>ETH</span>
 <canvas id="ethChart"></canvas>
-<span id="ethChange"></span>
+<span class="red">-0.45%</span>
+</div>
+
+<div class="asset">
+<span>SOL</span>
+<canvas id="solChart"></canvas>
+<span class="green">+3.12%</span>
 </div>
 
 </div>
@@ -109,39 +129,47 @@ iframe{width:100%;height:100%;border:none;}
 
 </div>
 
+<!-- CENTER -->
 <div id="center" class="panel">
-<iframe src="https://embed.windy.com/embed2.html?lat=53.1&lon=18&zoom=6&overlay=radar"></iframe>
+<div class="fakeMap">GLOBAL MAP / RADAR</div>
 </div>
 
+<!-- RIGHT -->
 <div id="right">
 
 <div class="panel">
 <h4>NEWS</h4>
-<ul id="news"></ul>
+<ul>
+<li>Market rises on strong earnings</li>
+<li>Inflation data surprises analysts</li>
+<li>Tech stocks lead rally</li>
+<li>Crypto volatility continues</li>
+</ul>
 </div>
 
 <div class="panel">
 <h4>AIR</h4>
-<div id="air"></div>
+<div>PM2.5: 42</div>
 </div>
 
 </div>
 
+<!-- BOTTOM -->
 <div id="bottom">
 
 <div class="panel">
 <h4>TRAFFIC</h4>
-<iframe src="https://www.google.com/maps?q=traffic%20Bydgoszcz&output=embed"></iframe>
+<div class="fakeMap">TRAFFIC MAP</div>
 </div>
 
 <div class="panel">
 <h4>FLIGHTS</h4>
-<iframe src="https://globe.adsbexchange.com/"></iframe>
+<div class="fakeMap">FLIGHT RADAR</div>
 </div>
 
 <div class="panel">
 <h4>SUN</h4>
-<div id="sun"></div>
+<div>↑ 05:01 ↓ 20:45</div>
 </div>
 
 </div>
@@ -155,74 +183,27 @@ clock.innerText=d.toLocaleTimeString();
 date.innerText=d.toLocaleDateString();
 },1000);
 
-// CHARTS
-let btcData=[], ethData=[];
+// GENERATE FAKE CHARTS
+function genData(){
+return Array.from({length:30},()=>Math.random()*100);
+}
 
-let btcChart=new Chart(document.getElementById("btcChart"),{
+new Chart(document.getElementById("btcChart"),{
 type:"line",
-data:{labels:[],datasets:[{data:btcData,borderColor:"#00ff88"}]},
+data:{labels:[],datasets:[{data:genData(),borderColor:"#00ff88"}]},
 options:{plugins:{legend:false},scales:{x:{display:false},y:{display:false}}}
 });
 
-let ethChart=new Chart(document.getElementById("ethChart"),{
+new Chart(document.getElementById("ethChart"),{
 type:"line",
-data:{labels:[],datasets:[{data:ethData,borderColor:"#00aaff"}]},
+data:{labels:[],datasets:[{data:genData(),borderColor:"#00aaff"}]},
 options:{plugins:{legend:false},scales:{x:{display:false},y:{display:false}}}
 });
 
-// DATA
-async function load(){
-let btc=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT").then(r=>r.json());
-let eth=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT").then(r=>r.json());
-
-let b=parseFloat(btc.lastPrice);
-let e=parseFloat(eth.lastPrice);
-
-btcData.push(b);
-ethData.push(e);
-
-if(btcData.length>40) btcData.shift();
-if(ethData.length>40) ethData.shift();
-
-btcChart.update();
-ethChart.update();
-
-btcChange.innerText=btc.priceChangePercent+"%";
-btcChange.className=btc.priceChangePercent>0?"green":"red";
-
-ethChange.innerText=eth.priceChangePercent+"%";
-ethChange.className=eth.priceChangePercent>0?"green":"red";
-}
-
-setInterval(load,3000);
-load();
-
-// NEWS
-fetch("https://api.allorigins.win/get?url="+encodeURIComponent("https://www.bankier.pl/rss/wiadomosci.xml"))
-.then(r=>r.json())
-.then(d=>{
-let xml=new DOMParser().parseFromString(d.contents,"text/xml");
-xml.querySelectorAll("item").forEach((i,x)=>{
-if(x<5){
-let li=document.createElement("li");
-li.innerText=i.querySelector("title").textContent;
-news.appendChild(li);
-}
-});
-});
-
-// AIR
-fetch("https://api.openaq.org/v2/latest?coordinates=53.12,18.00")
-.then(r=>r.json())
-.then(d=>{
-air.innerText="PM2.5: "+(d.results[0]?.measurements[0]?.value || "brak");
-});
-
-// SUN
-fetch("https://api.sunrise-sunset.org/json?lat=53.12&lng=18.00&formatted=0")
-.then(r=>r.json())
-.then(d=>{
-sun.innerText="↑ "+new Date(d.results.sunrise).toLocaleTimeString()+" ↓ "+new Date(d.results.sunset).toLocaleTimeString();
+new Chart(document.getElementById("solChart"),{
+type:"line",
+data:{labels:[],datasets:[{data:genData(),borderColor:"#ffaa00"}]},
+options:{plugins:{legend:false},scales:{x:{display:false},y:{display:false}}}
 });
 
 </script>
