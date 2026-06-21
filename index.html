@@ -68,6 +68,17 @@ textarea {
     <p>Internet: OK</p>
 </div>
 
+<div class="card">
+    <h3>Radar pogodowy</h3>
+
+    <iframe
+        width="100%"
+        height="300"
+        src="https://embed.windy.com/embed2.html?lat=53.1235&lon=18.0084&zoom=7&level=surface&overlay=radar&menu=&message=true&calendar=now"
+        frameborder="0">
+    </iframe>
+</div>
+
 <script>
 function updateClock() {
     const now = new Date();
@@ -78,5 +89,21 @@ setInterval(updateClock, 1000);
 updateClock();
 </script>
 
+<script>
+let radarFrame = document.querySelector("iframe");
+
+let offset = -60;
+
+setInterval(() => {
+    offset += 10;
+
+    if (offset > 60) offset = -60;
+
+    const url = `https://embed.windy.com/embed2.html?lat=53.1235&lon=18.0084&zoom=7&level=surface&overlay=radar&calendar=${offset}&message=true&type=map`;
+
+    radarFrame.src = url;
+
+}, 5000);
+</script>
 </body>
 </html>
