@@ -69,11 +69,10 @@ textarea {
 </div>
 
 <div class="card">
-    <h3>Radar (RainViewer)</h3>
-    <canvas id="radar" width="300" height="300" style="width:100%; border-radius:10px;"></canvas>
+    <h3>Radar pogodowy</h3>
+    <img id="radarImg" style="width:100%; border-radius:10px;" />
     <button onclick="toggleRadar()">Play / Pause</button>
 </div>
-
 <script>
 function updateClock() {
     const now = new Date();
@@ -85,44 +84,46 @@ updateClock();
 </script>
 <script>
 let frames = [];
-let current = 0;
+let index = 0;
 let playing = true;
-let ctx = document.getElementById("radar").getContext("2d");
+let timer;
 
 async function loadRadar() {
-    // lista klatek (RainViewer API)
-    let res = await fetch("https://api.rainviewer.com/public/weather-maps.json");
-    let data = await res.json();
+    const res = await fetch("https://api.rainviewer.com/public/weather-maps.json");
+    const data = await res.json();
 
+    // bierzemy tylko "past" (historia opadów)
     frames = data.radar.past.map(f => f.path);
-    animate();
+
+    play();
 }
 
-function drawFrame(url) {
-    let img = new Image();
-    img.src = "https://tilecache.rainviewer.com" + url + "/256/256/0/0/0.png";
-
-    img.onload = () => {
-        ctx.clearRect(0,0,300,300);
-        ctx.drawImage(img,0,0,300,300);
-    }
+function showFrame(i) {
+    const url = "https://tilecache.rainviewer.com" + frames[i] + "/256/1/1/0/0/0.png";
+    document.getElementById("radarImg").src = url;
 }
 
-function animate() {
-    if (!playing) return;
+function play() {
+    if (!frames.length) return;
 
-    drawFrame(frames[current]);
-    current = (current + 1) % frames.length;
-
-    setTimeout(animate, 500);
+    timer = setInterval(() => {
+        showFrame(index);
+        index = (index + 1) % frames.length;
+    }, 600);
 }
 
 function toggleRadar() {
     playing = !playing;
-    if (playing) animate();
+
+    if (playing) {
+        play();
+    } else {
+        clearInterval(timer);
+    }
 }
 
 loadRadar();
+
 </script>
 
 
