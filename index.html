@@ -3,170 +3,195 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard</title>
+<title>Dashboard PRO</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body {
-    margin: 0;
+    margin:0;
     font-family: Arial;
-    background: #0f0f14;
-    color: #fff;
-    display: grid;
-    grid-template-columns: 300px 1fr 300px;
-    grid-template-rows: auto auto 1fr;
-    gap: 15px;
-    padding: 15px;
-    height: 100vh;
-    box-sizing: border-box;
+    background:#0b0f14;
+    color:#fff;
+    display:grid;
+    grid-template-columns:320px 1fr 320px;
+    grid-template-rows:1fr 300px;
+    gap:12px;
+    height:100vh;
+    padding:12px;
 }
 
 .card {
-    background: #1c1c26;
-    border-radius: 15px;
-    padding: 15px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    overflow: hidden;
+    background:#111821;
+    border-radius:12px;
+    padding:12px;
+    box-shadow:0 0 15px rgba(0,0,0,0.6);
+    overflow:hidden;
 }
 
-h3 { margin-top: 0; }
+h3{margin:0 0 10px 0;}
 
-/* UKŁAD */
-#clockCard { grid-column: 1; grid-row: 1; }
-#finance { grid-column: 1; grid-row: 2; }
-#map { grid-column: 1; grid-row: 3; }
+#leftTop{display:flex;flex-direction:column;gap:10px;}
+#rightTop{display:flex;flex-direction:column;gap:10px;}
 
-#radar { grid-column: 2; grid-row: 1 / 3; }
-#planes { grid-column: 2; grid-row: 3; }
+iframe{width:100%;height:100%;border:none;border-radius:8px;}
 
-#news1 { grid-column: 3; grid-row: 1; }
-#news2 { grid-column: 3; grid-row: 2; }
-#status { grid-column: 3; grid-row: 3; }
-
-#clock {
-    font-size: 32px;
-    text-align: center;
+#centerBottom{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
 }
 
-/* RESPONSYWNOŚĆ */
-@media (max-width: 1000px) {
-    body {
-        grid-template-columns: 1fr;
-        height: auto;
-    }
-}
+#clock{font-size:38px;font-weight:bold;}
+.small{opacity:0.7;font-size:13px;}
+
+ul{padding-left:15px;margin:0;}
+li{margin-bottom:5px;}
+
+canvas{width:100%!important;height:60px!important;}
 </style>
 </head>
 
 <body>
 
-<div class="card" id="clockCard">
-    <h3>Data i godzina</h3>
-    <div id="clock"></div>
+<!-- LEFT -->
+<div id="leftTop">
+
+<div class="card">
+<div id="clock"></div>
+<div class="small" id="date"></div>
 </div>
 
-<div class="card" id="finance">
-    <h3>Finanse / Krypto</h3>
-    <div id="financeData">Ładowanie...</div>
+<div class="card">
+<h3>Pogoda (Bydgoszcz)</h3>
+<div id="weather">Ładowanie...</div>
 </div>
 
-<div class="card" id="map">
-    <h3>Mapa ruchu</h3>
-    <iframe width="100%" height="100%" frameborder="0"
-    src="https://www.google.com/maps?q=Bydgoszcz&output=embed"></iframe>
+<div class="card">
+<h3>Indeksy</h3>
+<div id="stocks"></div>
 </div>
 
-<div class="card" id="radar">
-    <h3>Radar pogodowy</h3>
-    <iframe width="100%" height="100%" frameborder="0"
-    src="https://embed.windy.com/embed2.html?lat=53.1235&lon=18.0084&zoom=6&overlay=radar"></iframe>
+<div class="card">
+<h3>Krypto</h3>
+<div id="crypto"></div>
 </div>
 
-<div class="card" id="planes">
-    <h3>Samoloty</h3>
-    <iframe width="100%" height="100%" frameborder="0"
-    src="https://globe.adsbexchange.com/"></iframe>
 </div>
 
-<div class="card" id="news1">
-    <h3>Finanse (świat)</h3>
-    <ul id="newsFinance"></ul>
+<div class="card">
+<iframe src="https://www.google.com/maps?q=Bydgoszcz&output=embed"></iframe>
 </div>
 
-<div class="card" id="news2">
-    <h3>Polska</h3>
-    <ul id="newsPL"></ul>
+<!-- CENTER -->
+<div class="card">
+<iframe src="https://embed.windy.com/embed2.html?lat=53.1&lon=18.0&zoom=6&overlay=radar"></iframe>
 </div>
 
-<div class="card" id="status">
-    <h3>Status</h3>
-    <p id="internet">Internet: ...</p>
-    <p id="system">System: OK</p>
-    <p id="air">Powietrze: ...</p>
-    <p id="sun">Słońce: ...</p>
+<div id="centerBottom">
+
+<div class="card">
+<h3>Ruch</h3>
+<iframe src="https://www.google.com/maps?q=traffic%20Bydgoszcz&output=embed"></iframe>
+</div>
+
+<div class="card">
+<h3>Samoloty</h3>
+<iframe src="https://globe.adsbexchange.com/"></iframe>
+</div>
+
+<div class="card">
+<h3>Powietrze</h3>
+<div id="air">Ładowanie...</div>
+</div>
+
+</div>
+
+<!-- RIGHT -->
+<div id="rightTop">
+
+<div class="card">
+<h3>Waluty</h3>
+<div id="forex"></div>
+</div>
+
+<div class="card">
+<h3>Wiadomości</h3>
+<ul id="news"></ul>
+</div>
+
+</div>
+
+<div class="card">
+<h3>Słońce</h3>
+<div id="sun"></div>
 </div>
 
 <script>
-// ZEGAR
-function updateClock() {
-    const now = new Date();
-    document.getElementById("clock").innerText =
-        now.toLocaleString();
+// CLOCK
+setInterval(()=>{
+let d=new Date();
+clock.innerText=d.toLocaleTimeString();
+date.innerText=d.toLocaleDateString();
+},1000);
+
+// WEATHER
+fetch("https://api.open-meteo.com/v1/forecast?latitude=53.12&longitude=18.00&current_weather=true")
+.then(r=>r.json())
+.then(d=>{
+weather.innerText=d.current_weather.temperature+"°C | wiatr "+d.current_weather.windspeed+" km/h";
+});
+
+// AIR
+fetch("https://api.openaq.org/v2/latest?coordinates=53.12,18.00")
+.then(r=>r.json())
+.then(d=>{
+air.innerText="PM2.5: "+(d.results[0]?.measurements[0]?.value || "brak");
+});
+
+// CRYPTO
+fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true")
+.then(r=>r.json())
+.then(d=>{
+crypto.innerHTML=
+"BTC: "+d.bitcoin.usd+" ("+d.bitcoin.usd_24h_change.toFixed(2)+"%)<br>"+
+"ETH: "+d.ethereum.usd+" ("+d.ethereum.usd_24h_change.toFixed(2)+"%)";
+});
+
+// FOREX
+fetch("https://api.exchangerate.host/latest?base=EUR&symbols=PLN,USD,GBP")
+.then(r=>r.json())
+.then(d=>{
+forex.innerHTML=
+"EUR/PLN "+d.rates.PLN+"<br>"+
+"EUR/USD "+d.rates.USD+"<br>"+
+"EUR/GBP "+d.rates.GBP;
+});
+
+// NEWS
+fetch("https://api.allorigins.win/get?url="+encodeURIComponent("https://www.bankier.pl/rss/wiadomosci.xml"))
+.then(r=>r.json())
+.then(d=>{
+let xml=new DOMParser().parseFromString(d.contents,"text/xml");
+let items=xml.querySelectorAll("item");
+news.innerHTML="";
+items.forEach((i,x)=>{
+if(x<5){
+let li=document.createElement("li");
+li.innerText=i.querySelector("title").textContent;
+news.appendChild(li);
 }
-setInterval(updateClock, 1000);
-updateClock();
+});
+});
 
-// INTERNET STATUS
-function checkInternet() {
-    document.getElementById("internet").innerText =
-        navigator.onLine ? "Internet: OK" : "Internet: BRAK";
-}
-setInterval(checkInternet, 3000);
-checkInternet();
-
-// FINANSE + KRYPTO (proste API)
-async function loadFinance() {
-    try {
-        let btc = await fetch("https://api.coindesk.com/v1/bpi/currentprice.json").then(r=>r.json());
-        let price = btc.bpi.USD.rate;
-
-        document.getElementById("financeData").innerHTML =
-            "BTC: $" + price + "<br>ETH: (do dodania)<br>SP500: (API później)";
-    } catch {
-        document.getElementById("financeData").innerText = "Błąd danych";
-    }
-}
-loadFinance();
-
-// NEWSY (RSS proxy)
-async function loadNews() {
-    try {
-        let res = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent("https://www.bankier.pl/rss/wiadomosci.xml"));
-        let data = await res.json();
-
-        let parser = new DOMParser();
-        let xml = parser.parseFromString(data.contents, "text/xml");
-
-        let items = xml.querySelectorAll("item");
-
-        let list = document.getElementById("newsFinance");
-        list.innerHTML = "";
-
-        items.forEach((item, i) => {
-            if(i<5){
-                let li = document.createElement("li");
-                li.innerText = item.querySelector("title").textContent;
-                list.appendChild(li);
-            }
-        });
-
-    } catch {}
-}
-loadNews();
-
-// PROSTE POWIETRZE + SŁOŃCE (symulacja na razie)
-document.getElementById("air").innerText = "Powietrze: OK";
-document.getElementById("sun").innerText = "Wschód/Zachód: 5:00 / 21:00";
-
+// SUN
+fetch("https://api.sunrise-sunset.org/json?lat=53.12&lng=18.00&formatted=0")
+.then(r=>r.json())
+.then(d=>{
+let sr=new Date(d.results.sunrise).toLocaleTimeString();
+let ss=new Date(d.results.sunset).toLocaleTimeString();
+sun.innerText="Wschód: "+sr+" | Zachód: "+ss;
+});
 </script>
 
 </body>
