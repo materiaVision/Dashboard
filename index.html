@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <title>Dashboard ULTRA</title>
 
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <style>
 body{
 margin:0;
@@ -35,7 +37,9 @@ grid-template-columns:2fr 2fr 1fr 1fr;
 gap:12px;
 }
 
-.widget{padding:14px;}
+.widget{
+padding:14px;
+}
 
 .weather{
 display:flex;
@@ -43,7 +47,9 @@ align-items:center;
 gap:15px;
 }
 
-.weather img{width:64px;}
+.weather img{
+width:64px;
+}
 
 .weatherTemp{
 font-size:32px;
@@ -56,10 +62,15 @@ justify-content:space-between;
 margin-top:10px;
 }
 
-.day{text-align:center;font-size:13px;}
-.day img{width:32px;}
+.day{
+text-align:center;
+font-size:13px;
+}
 
-/* VIEWER */
+.day img{
+width:32px;
+}
+
 #viewer{
 position:relative;
 overflow:hidden;
@@ -80,34 +91,6 @@ opacity:1;
 transform:scale(1);
 }
 
-/* LIVECAM FALLBACK */
-#livecamFallback{
-position:absolute;
-width:100%;
-height:100%;
-display:flex;
-align-items:center;
-justify-content:center;
-flex-direction:column;
-gap:20px;
-background:#0b0f14;
-}
-
-.btn{
-padding:12px 20px;
-background:#00ff88;
-color:#000;
-border-radius:10px;
-cursor:pointer;
-font-weight:bold;
-transition:0.2s;
-}
-
-.btn:hover{
-transform:scale(1.05);
-}
-
-/* BOTTOM */
 #bottom{
 display:flex;
 gap:12px;
@@ -137,6 +120,12 @@ iframe{
 width:100%;
 height:100%;
 border:none;
+}
+
+video{
+width:100%;
+height:100%;
+object-fit:cover;
 }
 </style>
 </head>
@@ -184,14 +173,9 @@ src="https://embed.windy.com/embed2.html?lat=53.12&lon=18.00&zoom=6&overlay=rada
 <iframe id="its" class="system"
 src="https://www.its.bydgoszcz.pl/mapa"></iframe>
 
-<!-- LIVECAM -->
+<!-- 🔥 LIVECAM -->
 <div id="livecam" class="system">
-
-<div id="livecamFallback">
-<div>📹 Kamera Stary Rynek – Bydgoszcz</div>
-<div class="btn" onclick="openCam()">Otwórz kamerę</div>
-</div>
-
+<video id="camVideo" autoplay muted playsinline controls></video>
 </div>
 
 </div>
@@ -219,11 +203,6 @@ document.getElementById(id).classList.add("active");
 
 document.querySelectorAll(".tile").forEach(t=>t.classList.remove("active"));
 el.classList.add("active");
-}
-
-// OTWIERANIE KAMERY
-function openCam(){
-window.open("https://www.bydgoszcz.com/s/37/stary-rynek-w-bydgoszczy", "_blank");
 }
 
 // WEATHER
@@ -277,6 +256,18 @@ document.getElementById("aqiValue").innerText = pm10;
 document.getElementById("aqiDesc").innerText = desc;
 document.getElementById("aqiValue").style.color = color;
 
+}
+
+// 🔥 LIVECAM STREAM
+const video = document.getElementById('camVideo');
+const streamUrl = "https://5a1178b42cc03.streamlock.net/bydgoszczmarket/stream/playlist.m3u8";
+
+if (Hls.isSupported()) {
+const hls = new Hls();
+hls.loadSource(streamUrl);
+hls.attachMedia(video);
+} else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+video.src = streamUrl;
 }
 
 // START
