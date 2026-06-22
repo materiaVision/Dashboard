@@ -131,7 +131,6 @@ border:none;
 <!-- TOP -->
 <div id="top">
 
-<!-- WEATHER -->
 <div class="widget glass">
 <div class="weather">
 <img id="weatherIcon">
@@ -143,20 +142,17 @@ border:none;
 </div>
 </div>
 
-<!-- FORECAST -->
 <div class="widget glass">
 <div style="opacity:.7">Prognoza 5 dni</div>
 <div class="forecast" id="forecast"></div>
 </div>
 
-<!-- AQI -->
 <div class="widget glass">
 <div>Powietrze</div>
 <div id="aqiValue" style="font-size:28px">--</div>
 <div id="aqiDesc" style="opacity:.7"></div>
 </div>
 
-<!-- SUN -->
 <div class="widget glass">
 <div id="sunrise">--</div>
 <div id="sunset">--</div>
@@ -173,15 +169,24 @@ src="https://embed.windy.com/embed2.html?lat=53.12&lon=18.00&zoom=6&overlay=rada
 <iframe id="its" class="system"
 src="https://www.its.bydgoszcz.pl/mapa"></iframe>
 
+<!-- 🔥 NOWA KAMERA -->
+<iframe id="livecam" class="system"
+src="https://www.skylinewebcams.com/en/webcam/poland/kuyavian-pomeranian/bydgoszcz/old-market-square.html"></iframe>
+
 </div>
 
 <!-- BOTTOM -->
 <div id="bottom">
+
 <div class="tile glass active" onclick="show('radar', this)">
 <div class="icon">🌧</div>RADAR</div>
 
 <div class="tile glass" onclick="show('its', this)">
 <div class="icon">🚦</div>ITS</div>
+
+<div class="tile glass" onclick="show('livecam', this)">
+<div class="icon">📹</div>LIVECAM</div>
+
 </div>
 
 <script>
@@ -195,7 +200,7 @@ document.querySelectorAll(".tile").forEach(t=>t.classList.remove("active"));
 el.classList.add("active");
 }
 
-// 🌤 WEATHER + FORECAST
+// WEATHER
 async function loadWeather(){
 
 const url = "https://api.open-meteo.com/v1/forecast?latitude=53.1235&longitude=18.0084&current_weather=true&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,weathercode&timezone=auto";
@@ -205,21 +210,17 @@ const data = await res.json();
 
 const w = data.current_weather;
 
-// CURRENT
 document.getElementById("temp").innerText = w.temperature + "°C";
 document.getElementById("details").innerText = "Wiatr: " + w.windspeed + " km/h";
 
-// ICON
 const icon = w.weathercode < 3
 ? "https://cdn-icons-png.flaticon.com/512/869/869869.png"
 : "https://cdn-icons-png.flaticon.com/512/414/414825.png";
 
 document.getElementById("weatherIcon").src = icon;
 
-// FORECAST
 const days = data.daily.time;
 const max = data.daily.temperature_2m_max;
-const min = data.daily.temperature_2m_min;
 
 let html = "";
 
@@ -234,13 +235,12 @@ html += `
 
 document.getElementById("forecast").innerHTML = html;
 
-// SUN
 document.getElementById("sunrise").innerText = "🌅 " + data.daily.sunrise[0].slice(11,16);
 document.getElementById("sunset").innerText = "🌇 " + data.daily.sunset[0].slice(11,16);
 
 }
 
-// 🌬 AQI
+// AQI
 async function loadAQI(){
 
 const url = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=53.1235&longitude=18.0084&current=pm10";
