@@ -2,185 +2,124 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
 
 <style>
 body{
 margin:0;
+background:#0b0f14;
 font-family:Segoe UI;
 color:#fff;
-background:#0b0f14;
-padding:12px;
+display:grid;
+grid-template-columns:260px 1fr 320px;
+grid-template-rows:50px 1fr 260px;
+gap:6px;
+height:100vh;
+padding:6px;
 }
 
-/* 🔥 PANEL */
-#weatherPanel{
-background:linear-gradient(180deg,#0b1c2a,#07131d);
-border-radius:20px;
-padding:20px;
-box-shadow:0 10px 40px rgba(0,0,0,.6);
-}
-
-/* TOP */
-.top{
+#top{
+grid-column:1/4;
 display:flex;
 justify-content:space-between;
 align-items:center;
+padding:0 12px;
+background:#0f1620;
+border:1px solid rgba(255,255,255,.05);
 }
 
-.left{
-display:flex;
-align-items:center;
-gap:20px;
+.panel{
+background:#0f1620;
+border:1px solid rgba(255,255,255,.05);
+padding:6px;
+overflow:hidden;
+position:relative;
 }
 
-.icon{
-width:90px;
+#left{display:flex;flex-direction:column;gap:6px;}
+#right{display:flex;flex-direction:column;gap:6px;}
+
+iframe{
+width:100%;
+height:100%;
+border:none;
 }
 
-.temp{
-font-size:80px;
-font-weight:300;
+/* TRAFFIC */
+#traffic{
+grid-column:1/4;
 }
 
-.right{
-text-align:right;
+/* HUD */
+#trafficHUD{
+position:absolute;
+top:10px;
+left:10px;
+background:rgba(0,0,0,0.6);
+padding:6px 10px;
+font-size:12px;
+border-radius:6px;
+border:1px solid rgba(255,255,255,0.1);
+z-index:2;
 }
 
-.desc{
-font-size:22px;
-opacity:.9;
-}
-
-/* DETAILS */
-.details{
-display:flex;
-justify-content:space-between;
-margin-top:20px;
-opacity:.8;
-font-size:14px;
-}
-
-.details div{
-text-align:center;
-}
-
-/* FORECAST */
-.forecast{
-display:flex;
-justify-content:space-between;
-margin-top:20px;
-border-top:1px solid rgba(255,255,255,0.1);
-padding-top:15px;
-}
-
-.day{
-text-align:center;
-font-size:14px;
-}
-
-.day img{
-width:36px;
-margin:5px 0;
-}
-
-.max{
-font-size:18px;
-}
-
-.min{
-opacity:.6;
-font-size:13px;
+/* subtle overlay */
+#traffic::after{
+content:"";
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4));
+pointer-events:none;
 }
 </style>
 </head>
 
 <body>
 
-<div id="weatherPanel">
-
-<div class="top">
-
-<div class="left">
-<img id="icon" class="icon">
-<div class="temp" id="temp">--°</div>
+<div id="top">
+<div id="clock"></div>
+<div>GLOBAL TERMINAL</div>
+<div id="date"></div>
 </div>
 
-<div class="right">
-<div id="city">Bydgoszcz</div>
-<div class="desc" id="desc">Ładowanie...</div>
+<div id="left">
+<div class="panel">CRYPTO</div>
+<div class="panel">INDICES</div>
 </div>
 
+<!-- RADAR -->
+<div class="panel">
+<iframe src="https://embed.windy.com/embed2.html?lat=53.12&lon=18.00&zoom=6&overlay=radar"></iframe>
 </div>
 
-<div class="details">
-<div>
-Wilgotność<br><b id="humidity">--%</b>
-</div>
-<div>
-Wiatr<br><b id="wind">-- km/h</b>
-</div>
-<div>
-Ciśnienie<br><b id="pressure">-- hPa</b>
-</div>
+<div id="right">
+<div class="panel">NEWS</div>
+<div class="panel">AIR</div>
 </div>
 
-<div class="forecast" id="forecast"></div>
+<!-- ITS TRAFFIC -->
+<div id="traffic" class="panel">
+
+<div id="trafficHUD">
+Kliknij ikonę warstw → włącz „natężenie ruchu”
+</div>
+
+<iframe src="https://www.its.bydgoszcz.pl/mapa"></iframe>
 
 </div>
 
 <script>
 
-// DNI
-const daysPL = ["Nd","Pon","Wt","Śr","Czw","Pt","Sob"];
-
-// IKONY (ładniejsze)
-function getIcon(code){
-if(code < 3) return "https://cdn-icons-png.flaticon.com/512/869/869869.png";
-if(code < 50) return "https://cdn-icons-png.flaticon.com/512/414/414825.png";
-return "https://cdn-icons-png.flaticon.com/512/1146/1146869.png";
-}
-
-async function loadWeather(){
-
-const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=53.1235&longitude=18.0084&current_weather=true&daily=temperature_2m_max,temperature_2m_min,weathercode&hourly=relativehumidity_2m,pressure_msl,windspeed_10m&timezone=auto");
-const data = await res.json();
-
-const w = data.current_weather;
-
-// MAIN
-document.getElementById("temp").innerText = Math.round(w.temperature) + "°";
-document.getElementById("desc").innerText = "Aktualna pogoda";
-document.getElementById("icon").src = getIcon(w.weathercode);
-
-// DETAILS (bierzemy pierwsze wartości z hourly)
-document.getElementById("humidity").innerText = data.hourly.relativehumidity_2m[0] + "%";
-document.getElementById("wind").innerText = w.windspeed + " km/h";
-document.getElementById("pressure").innerText = Math.round(data.hourly.pressure_msl[0]) + " hPa";
-
-// FORECAST
-let html = "";
-
-for(let i=0;i<7;i++){
-
-const date = new Date(data.daily.time[i]);
-const day = daysPL[date.getDay()];
-
-html += `
-<div class="day">
-<div>${day}</div>
-<img src="${getIcon(data.daily.weathercode[i])}">
-<div class="max">${Math.round(data.daily.temperature_2m_max[i])}°</div>
-<div class="min">${Math.round(data.daily.temperature_2m_min[i])}°</div>
-</div>
-`;
-}
-
-document.getElementById("forecast").innerHTML = html;
-
-}
-
-loadWeather();
+// CLOCK
+setInterval(()=>{
+let d=new Date();
+clock.innerText=d.toLocaleTimeString();
+date.innerText=d.toLocaleDateString();
+},1000);
 
 </script>
 
