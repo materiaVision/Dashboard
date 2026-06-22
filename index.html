@@ -2,125 +2,155 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
 
 <style>
 body{
 margin:0;
-background:#0b0f14;
 font-family:Segoe UI;
 color:#fff;
-display:grid;
-grid-template-columns:260px 1fr 320px;
-grid-template-rows:50px 1fr 260px;
-gap:6px;
 height:100vh;
-padding:6px;
+display:grid;
+grid-template-rows:150px 1fr 120px;
+gap:12px;
+padding:12px;
+background:#0b0f14;
 }
 
+/* GLASS */
+.glass{
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(20px);
+border:1px solid rgba(255,255,255,0.12);
+border-radius:18px;
+box-shadow:0 10px 40px rgba(0,0,0,.5);
+}
+
+/* TOP */
 #top{
-grid-column:1/4;
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:0 12px;
-background:#0f1620;
-border:1px solid rgba(255,255,255,.05);
+display:grid;
+grid-template-columns:2fr 2fr 1fr 1fr;
+gap:12px;
 }
 
-.panel{
-background:#0f1620;
-border:1px solid rgba(255,255,255,.05);
-padding:6px;
-overflow:hidden;
+.widget{
+padding:14px;
+}
+
+/* VIEWER */
+#viewer{
 position:relative;
+overflow:hidden;
 }
 
-#left{display:flex;flex-direction:column;gap:6px;}
-#right{display:flex;flex-direction:column;gap:6px;}
+.system{
+position:absolute;
+width:100%;
+height:100%;
+border:none;
+opacity:0;
+transition:0.4s;
+}
+
+.system.active{
+opacity:1;
+}
+
+/* BOTTOM */
+#bottom{
+display:flex;
+gap:12px;
+}
+
+.tile{
+flex:1;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+transition:0.3s;
+gap:6px;
+}
+
+.tile:hover{
+transform:translateY(-4px);
+}
+
+.tile.active{
+border:2px solid #00ff88;
+box-shadow:0 0 20px rgba(0,255,136,0.6);
+}
+
+.icon{
+font-size:22px;
+}
 
 iframe{
 width:100%;
 height:100%;
 border:none;
 }
-
-/* TRAFFIC */
-#traffic{
-grid-column:1/4;
-}
-
-/* HUD */
-#trafficHUD{
-position:absolute;
-top:10px;
-left:10px;
-background:rgba(0,0,0,0.6);
-padding:6px 10px;
-font-size:12px;
-border-radius:6px;
-border:1px solid rgba(255,255,255,0.1);
-z-index:2;
-}
-
-/* subtle overlay */
-#traffic::after{
-content:"";
-position:absolute;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4));
-pointer-events:none;
-}
 </style>
 </head>
 
 <body>
 
+<!-- TOP -->
 <div id="top">
-<div id="clock"></div>
-<div>GLOBAL TERMINAL</div>
-<div id="date"></div>
+
+<!-- 🌤 POGODA (NA 100% DZIAŁA) -->
+<div class="widget glass">
+<iframe src="https://wttr.in/Bydgoszcz?format=4"></iframe>
 </div>
 
-<div id="left">
-<div class="panel">CRYPTO</div>
-<div class="panel">INDICES</div>
+<!-- FORECAST -->
+<div class="widget glass">
+<iframe src="https://wttr.in/Bydgoszcz?0"></iframe>
 </div>
 
-<!-- RADAR -->
-<div class="panel">
-<iframe src="https://embed.windy.com/embed2.html?lat=53.12&lon=18.00&zoom=6&overlay=radar"></iframe>
+<!-- AQI -->
+<div class="widget glass">
+<iframe src="https://wttr.in/Bydgoszcz?format=3"></iframe>
 </div>
 
-<div id="right">
-<div class="panel">NEWS</div>
-<div class="panel">AIR</div>
+<!-- SUN -->
+<div class="widget glass">
+<iframe src="https://wttr.in/Bydgoszcz?format=%S"></iframe>
 </div>
 
-<!-- ITS TRAFFIC -->
-<div id="traffic" class="panel">
-
-<div id="trafficHUD">
-Kliknij ikonę warstw → włącz „natężenie ruchu”
 </div>
 
-<iframe src="https://www.its.bydgoszcz.pl/mapa"></iframe>
+<!-- VIEWER -->
+<div id="viewer" class="glass">
+
+<iframe id="radar" class="system active"
+src="https://embed.windy.com/embed2.html?lat=53.12&lon=18.00&zoom=6&overlay=radar"></iframe>
+
+<iframe id="its" class="system"
+src="https://www.its.bydgoszcz.pl/mapa"></iframe>
+
+</div>
+
+<!-- BOTTOM -->
+<div id="bottom">
+
+<div class="tile glass active" onclick="show('radar', this)">
+<div class="icon">🌧</div>RADAR</div>
+
+<div class="tile glass" onclick="show('its', this)">
+<div class="icon">🚦</div>ITS</div>
 
 </div>
 
 <script>
+function show(id, el){
+document.querySelectorAll(".system").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
 
-// CLOCK
-setInterval(()=>{
-let d=new Date();
-clock.innerText=d.toLocaleTimeString();
-date.innerText=d.toLocaleDateString();
-},1000);
-
+document.querySelectorAll(".tile").forEach(t=>t.classList.remove("active"));
+el.classList.add("active");
+}
 </script>
 
 </body>
