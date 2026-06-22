@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard</title>
+<title>Dashboard ULTRA</title>
 
 <style>
 body{
@@ -19,8 +19,8 @@ background:#0b0f14;
 
 /* GLASS */
 .glass{
-background:rgba(255,255,255,0.08);
-backdrop-filter:blur(20px);
+background:linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02));
+backdrop-filter:blur(25px);
 border:1px solid rgba(255,255,255,0.12);
 border-radius:18px;
 box-shadow:0 10px 40px rgba(0,0,0,.5);
@@ -35,6 +35,29 @@ gap:12px;
 
 .widget{
 padding:14px;
+}
+
+/* WEATHER */
+.weather{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.weather img{
+width:60px;
+}
+
+/* FORECAST */
+.forecast{
+display:flex;
+justify-content:space-between;
+margin-top:10px;
+}
+
+.day{
+text-align:center;
+font-size:13px;
 }
 
 /* VIEWER */
@@ -74,7 +97,7 @@ gap:6px;
 }
 
 .tile:hover{
-transform:translateY(-4px);
+transform:translateY(-5px);
 }
 
 .tile.active{
@@ -99,24 +122,27 @@ border:none;
 <!-- TOP -->
 <div id="top">
 
-<!-- 🌤 POGODA (NA 100% DZIAŁA) -->
+<!-- 🌤 POGODA (PEWNA) -->
 <div class="widget glass">
-<iframe src="https://wttr.in/Bydgoszcz?format=4"></iframe>
+<div id="weatherBox">Ładowanie pogody...</div>
 </div>
 
-<!-- FORECAST -->
+<!-- forecast -->
 <div class="widget glass">
-<iframe src="https://wttr.in/Bydgoszcz?0"></iframe>
+<div>Prognoza</div>
+<div class="forecast" id="forecast"></div>
 </div>
 
 <!-- AQI -->
 <div class="widget glass">
-<iframe src="https://wttr.in/Bydgoszcz?format=3"></iframe>
+<div>Powietrze</div>
+<div id="aqiValue">--</div>
 </div>
 
 <!-- SUN -->
 <div class="widget glass">
-<iframe src="https://wttr.in/Bydgoszcz?format=%S"></iframe>
+<div id="sunrise">--</div>
+<div id="sunset">--</div>
 </div>
 
 </div>
@@ -144,6 +170,8 @@ src="https://www.its.bydgoszcz.pl/mapa"></iframe>
 </div>
 
 <script>
+
+// SWITCH
 function show(id, el){
 document.querySelectorAll(".system").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
@@ -151,6 +179,82 @@ document.getElementById(id).classList.add("active");
 document.querySelectorAll(".tile").forEach(t=>t.classList.remove("active"));
 el.classList.add("active");
 }
+
+// 🌤 POGODA (WTTR — DZIAŁA ZAWSZE)
+async function loadWeather(){
+try{
+const res = await fetch("https://wttr.in/Bydgoszcz?format=j1");
+const data = await res.json();
+
+const current = data.current_condition[0];
+
+const temp = current.temp_C;
+const desc = current.weatherDesc[0].value;
+const icon = current.weatherIconUrl[0].value;
+
+// MAIN
+document.getElementById("weatherBox").innerHTML = `
+<div class="weather">
+<img src="${icon}">
+<div>
+<div style="font-size:28px">${temp}°C</div>
+<div style="opacity:.7">${desc}</div>
+</div>
+</div>
+`;
+
+// FORECAST
+let html="";
+for(let i=0;i<3;i++){
+const day = data.weather[i];
+html += `
+<div class="day">
+<div>${day.date.slice(5)}</div>
+<div>${day.avgtempC}°</div>
+</div>`;
+}
+document.getElementById("forecast").innerHTML = html;
+
+}catch(e){
+document.getElementById("weatherBox").innerText="Brak danych pogodowych";
+}
+}
+
+// 🌬 AQI
+async function loadAQI(){
+try{
+const res = await fetch("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=53.1235&longitude=18.0084&current=pm10");
+const data = await res.json();
+
+document.getElementById("aqiValue").innerText = data.current.pm10;
+
+}catch(e){
+document.getElementById("aqiValue").innerText="--";
+}
+}
+
+// 🌅 SUN (z wttr)
+async function loadSun(){
+try{
+const res = await fetch("https://wttr.in/Bydgoszcz?format=j1");
+const data = await res.json();
+
+const astro = data.weather[0].astronomy[0];
+
+document.getElementById("sunrise").innerText = "🌅 " + astro.sunrise;
+document.getElementById("sunset").innerText = "🌇 " + astro.sunset;
+
+}catch(e){
+document.getElementById("sunrise").innerText="--";
+document.getElementById("sunset").innerText="--";
+}
+}
+
+// START
+loadWeather();
+loadAQI();
+loadSun();
+
 </script>
 
 </body>
